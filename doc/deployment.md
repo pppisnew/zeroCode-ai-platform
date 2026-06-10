@@ -9,7 +9,7 @@ Phase 3 的部署链路先实现最小可验证能力：
 - 支持 Vue/React Vite 项目。
 - 不在平台服务内直接执行用户项目构建或部署命令。
 
-当前已新增 `deploy-service` 最小骨架和 executor routing 边界。Docker、GitHub Actions、Kubernetes 自动部署执行器默认不启用；显式启用后当前仍只返回 skipped，不执行真实命令。
+当前已新增 `deploy-service` 最小骨架和 executor routing 边界。Docker executor 开始进入受控真实执行路径；默认仍为 dry-run，不执行真实命令。GitHub Actions、Kubernetes 自动部署执行器仍只返回 skipped。
 
 ## 2. 当前实现
 
@@ -153,11 +153,31 @@ http://localhost:8080
 - `deploy-service`: `8081`
 - `platform-service`: `8080`，context path 为 `/api`
 
-当前显式启用后的 Docker/GitHub Actions/Kubernetes executor 仍为安全占位实现：
+当前 Docker executor 的执行边界：
+
+- `zerocode.deploy.executors.docker.enabled=false` 时不参与路由，继续使用 dry-run fallback。
+- `zerocode.deploy.executors.docker.enabled=true` 但 `execution-mode` 不是 `real` 时，返回 `skipped`，不执行真实命令。
+- 只有同时满足 `enabled=true` 和 `execution-mode=real` 时，才会进入真实 Docker 路径。
+- 真实 Docker 路径负责下载 artifact ZIP、进行 zip-slip 安全解压、执行 `docker build`，并在配置启用时执行 `docker push`。
+- Docker 命令通过 `DockerCommandRunner` 抽象执行，便于测试中替换为 fake runner。
+- 真实执行失败会返回 `failed`，成功会返回 `succeeded`。
+
+Docker executor 配置：
+
+| 配置项 | 环境变量 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `zerocode.deploy.executors.docker.enabled` | `DEPLOY_DOCKER_EXECUTOR_ENABLED` | `false` | 是否注册 Docker target executor |
+| `zerocode.deploy.executors.docker.execution-mode` | `DEPLOY_DOCKER_EXECUTION_MODE` | `dry-run` | 只有 `real` 才执行真实命令 |
+| `zerocode.deploy.executors.docker.workspace-root` | `DEPLOY_DOCKER_WORKSPACE_ROOT` | `/tmp/zerocode-docker-deployments` | artifact 临时解压根目录 |
+| `zerocode.deploy.executors.docker.command-timeout-seconds` | `DEPLOY_DOCKER_COMMAND_TIMEOUT_SECONDS` | `300` | 单条 Docker 命令超时 |
+| `zerocode.deploy.executors.docker.image-repository-prefix` | `DEPLOY_DOCKER_IMAGE_REPOSITORY_PREFIX` | `zerocode` | 镜像名前缀 |
+| `zerocode.deploy.executors.docker.push-enabled` | `DEPLOY_DOCKER_PUSH_ENABLED` | `false` | 是否执行 `docker push` |
+
+当前 GitHub Actions/Kubernetes executor 显式启用后仍为安全占位实现：
 
 - 返回部署状态 `skipped`。
 - 写入 executionLogs，说明当前构建未实现真实命令执行。
-- 不调用宿主机 Docker、GitHub API、kubectl 或 Kubernetes API。
+- 不调用 GitHub API、kubectl 或 Kubernetes API。
 
 部署状态：
 

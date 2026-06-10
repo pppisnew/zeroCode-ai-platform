@@ -33,8 +33,8 @@ class DeploymentExecutorRouterTests {
         assertThat(result.status()).isEqualTo("skipped");
         assertThat(result.executionLogs())
                 .contains(
-                        "Docker executor enabled",
-                        "Real command execution is not implemented in this build",
+                        "Docker executor enabled in dry-run mode",
+                        "Set zerocode.deploy.executors.docker.execution-mode=real to execute Docker commands",
                         "Skipped: docker build .");
     }
 

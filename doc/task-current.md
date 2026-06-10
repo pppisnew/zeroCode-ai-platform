@@ -435,6 +435,19 @@ Java 安全与限制：
   - 已创建首次提交：`3fe98bb chore: initialize repository`。
   - 已执行 `git push -u origin main`，本地 `main` 已跟踪 `origin/main`。
   - 已追加并推送文档状态提交：`5ff1986 docs: record git remote push`。
+- Docker executor 受控真实执行路径已完成并通过测试。
+  - 本轮设计边界已先写入 `doc/deployment.md`。
+  - 默认仍不执行真实命令；必须同时配置 Docker executor `enabled=true` 和 `execution-mode=real` 才进入真实 Docker 路径。
+  - 真实 Docker 路径目标：下载 artifact ZIP、安全解压、执行 `docker build`，可选 `docker push`，并返回 `succeeded/failed`。
+  - 命令执行通过 `DockerCommandRunner` 抽象，测试使用 fake runner，避免单元测试调用真实 Docker。
+  - 已新增 `DockerCommandRunner`、`DockerCommandResult`、`ProcessDockerCommandRunner`。
+  - `DockerDeploymentExecutor` 已实现 real mode：下载 artifact、zip-slip 安全解压、执行 fake/real runner、按结果返回 `succeeded/failed`。
+  - `application.yml` 已新增 Docker executor real mode 配置项。
+  - 已新增 `DockerDeploymentExecutorTests`，覆盖 dry-run skipped、real mode build、build failed、zip-slip artifact rejected。
+  - 已同步更新 router/service 测试中的 Docker executor 日志断言。
+  - 最新 deploy-service 测试：
+    - 命令：`mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`
+    - 结果：19 tests passed，BUILD SUCCESS。
 
 ## 4. 核心设计决策
 
@@ -601,6 +614,7 @@ Java 安全与限制：
 - [x] 初始化 Git 仓库并创建 Git 说明文档。
 - [x] 关联 GitHub remote 并推送 main 分支。
 - [ ] Phase 3：实现生产级自动部署执行器、GitHub Actions/Kubernetes 集成。
+- [x] Phase 3：实现 Docker executor 受控真实执行路径。
 - [ ] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
 
 ## 6. 下一步行动

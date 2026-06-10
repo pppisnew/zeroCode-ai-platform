@@ -66,8 +66,8 @@ class InMemoryDeploymentServiceTests {
         assertThat(deployment.status()).isEqualTo("skipped");
         assertThat(deployment.executionLogs())
                 .contains(
-                        "Docker executor enabled",
-                        "Real command execution is not implemented in this build");
+                        "Docker executor enabled in dry-run mode",
+                        "Set zerocode.deploy.executors.docker.execution-mode=real to execute Docker commands");
         assertThat(service.getDeployment(deployment.id()).status()).isEqualTo("skipped");
     }
 

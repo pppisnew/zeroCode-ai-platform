@@ -11,6 +11,11 @@ zerocode:
     executors:
       docker:
         enabled: ${DEPLOY_DOCKER_EXECUTOR_ENABLED:false}
+        execution-mode: ${DEPLOY_DOCKER_EXECUTION_MODE:dry-run}
+        workspace-root: ${DEPLOY_DOCKER_WORKSPACE_ROOT:/tmp/zerocode-docker-deployments}
+        command-timeout-seconds: ${DEPLOY_DOCKER_COMMAND_TIMEOUT_SECONDS:300}
+        image-repository-prefix: ${DEPLOY_DOCKER_IMAGE_REPOSITORY_PREFIX:zerocode}
+        push-enabled: ${DEPLOY_DOCKER_PUSH_ENABLED:false}
       github-actions:
         enabled: ${DEPLOY_GITHUB_ACTIONS_EXECUTOR_ENABLED:false}
       kubernetes:
