@@ -23,6 +23,26 @@ doc/                         Product and architecture documents
 
 ## Run Infrastructure
 
+Recommended full local startup:
+
+```bash
+scripts/start-project.sh
+```
+
+Stop application services:
+
+```bash
+scripts/stop-project.sh
+```
+
+Stop application services and infrastructure:
+
+```bash
+scripts/stop-project.sh --infra
+```
+
+Manual infrastructure startup:
+
 ```bash
 cd infra
 docker compose up -d

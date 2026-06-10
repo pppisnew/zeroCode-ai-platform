@@ -27,7 +27,60 @@
 
 ## 3. 启动顺序
 
+推荐优先使用脚本启动完整本地环境：
+
+```bash
+scripts/start-project.sh
+```
+
+脚本会依次启动：
+
+- `infra` Docker Compose 基础设施。
+- Python AI Orchestrator。
+- Deploy Service。
+- Platform Service。
+- Frontend。
+
+运行时文件：
+
+- PID：`.runtime/pids/*.pid`
+- 日志：`.runtime/logs/*.log`
+
+如果只想启动应用服务，不启动 Docker 基础设施：
+
+```bash
+scripts/start-project.sh --skip-infra
+```
+
+如果不希望脚本自动执行缺失依赖安装：
+
+```bash
+scripts/start-project.sh --no-install
+```
+
+停止应用服务：
+
+```bash
+scripts/stop-project.sh
+```
+
+停止应用服务并关闭 Docker 基础设施：
+
+```bash
+scripts/stop-project.sh --infra
+```
+
+停止并删除 Docker 数据卷：
+
+```bash
+scripts/stop-project.sh --volumes
+```
+
+注意：`--volumes` 会删除本地 MySQL、Redis、RabbitMQ、MinIO 数据卷，只能在确认不需要本地数据后使用。
+
 ### 3.1 基础设施
+
+以下为手动启动方式。
 
 ```bash
 cd infra

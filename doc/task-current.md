@@ -564,6 +564,17 @@ Java 安全与限制：
   - 新增 `doc/project-learning-guide.md`。
   - 根 `README.md` 的 Operations Documents 已加入该学习指南入口。
   - 文档按用户要求的 11 个章节组织，面向完全没有经验的新手开发者。
+- 当前进入本地启动/关闭脚本补齐：
+  - 目标是新增一键启动和关闭脚本，降低新手启动多服务项目的成本。
+  - 计划新增 `scripts/start-project.sh` 和 `scripts/stop-project.sh`。
+  - 脚本应将应用服务 PID 和日志写入 `.runtime/`，并默认保留 Docker 基础设施数据卷。
+- 本地启动/关闭脚本补齐已完成：
+  - 新增 `scripts/start-project.sh`，支持启动 infra、AI Orchestrator、deploy-service、platform-service、frontend。
+  - 新增 `scripts/stop-project.sh`，默认停止应用服务，支持 `--infra` 停止 Docker 基础设施，支持 `--volumes` 删除本地 Docker 数据卷。
+  - `.runtime/` 已加入 `.gitignore`，用于保存 PID 和日志。
+  - `README.md` 和 `doc/operations.md` 已补充脚本用法。
+  - 已执行脚本静态验证：`bash -n scripts/start-project.sh`、`bash -n scripts/stop-project.sh` 均通过。
+  - 已执行 help 输出验证：`scripts/start-project.sh --help`、`scripts/stop-project.sh --help` 均通过。
 
 ## 4. 核心设计决策
 
@@ -738,6 +749,7 @@ Java 安全与限制：
 - [x] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
 - [x] 新增并维护后期运维文档，方便接手人员启动、验证、排障和恢复任务上下文。
 - [x] 新增新人项目学习文档，帮助无经验开发者按顺序理解并阅读代码。
+- [x] 新增项目启动和关闭脚本，并更新运维文档。
 
 ## 6. 下一步行动
 
