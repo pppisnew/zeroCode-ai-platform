@@ -4,7 +4,6 @@ dist/
 target/
 .idea/
 .vscode/
-.env
 .venv/
 __pycache__/
 !**/__init__.py
