@@ -39,6 +39,9 @@
 
 当前实现：
 
+- 前端常量：`frontend/src/utils/projectSecurityLimits.ts`
+- Python 常量：`ai-services/ai-orchestrator/app/models/project_limits.py`
+- Java 常量：`backend/platform-service/src/main/java/com/zerocode/platform/util/ProjectSecurityLimits.java`
 - 前端：`normalizeProjectPath()`、`isSafeProjectPath()`、`validateProjectFiles()`
 - Python：`normalize_project_path()`、`is_safe_project_path()`、`validate_project_file_paths()`
 - Java：`safeProjectPath()`、`validateProjectFiles()`、`validateUniqueSafePaths()`
@@ -223,7 +226,7 @@ npm run build
 ## 9. 已知风险
 
 - 当前安全规则主要基于正则和 HTMLParser，不是完整 HTML/CSS/JS AST 安全分析。
-- 前端、Python、Java 仍存在重复规则；修改任一层时必须同步检查另外两层。
+- 前端、Python、Java 的结构限制值已抽取到各层命名常量；内容安全正则仍存在重复规则，修改任一层时必须同步检查另外两层。
 - CSP 当前允许内联脚本，是为了支持 HTML 项目预览交互；风险由 iframe sandbox、CSP `connect-src 'none'`、内容清理和保存前校验共同降低。
 - Docker sandbox 默认跳过，启用后才对 Vue/React 做真实构建隔离检查。
 - 外部依赖版本和 npm audit 风险需要单独评估，不在本文档规则范围内。

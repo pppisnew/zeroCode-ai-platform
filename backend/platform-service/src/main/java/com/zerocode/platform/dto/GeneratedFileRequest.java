@@ -1,10 +1,11 @@
 package com.zerocode.platform.dto;
 
+import com.zerocode.platform.util.ProjectSecurityLimits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record GeneratedFileRequest(
-        @NotBlank @Size(max = 500) String filePath,
-        @NotBlank @Size(max = 32) String fileType,
-        @NotBlank @Size(max = 200_000) String content) {
+        @NotBlank @Size(max = ProjectSecurityLimits.MAX_FILE_PATH_LENGTH) String filePath,
+        @NotBlank @Size(max = ProjectSecurityLimits.MAX_FILE_TYPE_LENGTH) String fileType,
+        @NotBlank @Size(max = ProjectSecurityLimits.MAX_FILE_CONTENT_LENGTH) String content) {
 }

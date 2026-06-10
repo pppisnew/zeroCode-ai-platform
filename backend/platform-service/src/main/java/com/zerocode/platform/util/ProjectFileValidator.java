@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class ProjectFileValidator {
-    private static final int MAX_PROJECT_NAME_LENGTH = 128;
     private static final Set<String> PROJECT_TYPES = Set.of("html", "vue", "react");
     private static final Pattern NETWORK_SCRIPT_PATTERN = Pattern.compile(
             "\\b(fetch|XMLHttpRequest|WebSocket|EventSource)\\s*\\(",
@@ -52,7 +51,7 @@ public final class ProjectFileValidator {
             throw new IllegalArgumentException("Project is required");
         }
         if (project.projectName() == null || project.projectName().isBlank()
-                || project.projectName().length() > MAX_PROJECT_NAME_LENGTH) {
+                || project.projectName().length() > ProjectSecurityLimits.MAX_PROJECT_NAME_LENGTH) {
             throw new IllegalArgumentException("Invalid project name");
         }
         if (!PROJECT_TYPES.contains(project.projectType())) {

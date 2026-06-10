@@ -491,6 +491,20 @@ Java 安全与限制：
   - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
   - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed。
   - deploy-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed。
+- 三层项目结构安全限制常量已抽取并通过测试。
+  - 本轮只处理结构限制值：项目名长度、文件数量、文件路径长度、文件类型长度、单文件内容长度。
+  - 前端已新增 `projectSecurityLimits.ts` 并由 `projectFileSecurity.ts` 使用。
+  - Python 已新增 `project_limits.py` 并由 `GeneratedFile`/`GeneratedProject` Pydantic 模型使用。
+  - Java 已新增 `ProjectSecurityLimits`，并由 DTO 与 `ProjectFileValidator` 使用。
+  - 内容安全正则暂不跨语言抽取，后续需要更系统的 AST/解析器方案。
+  - 已完成前端/Python/Java 结构限制常量抽取。
+  - 已更新 `doc/security-rules.md`，记录三层常量文件位置和剩余正则漂移风险。
+  - 受影响层测试已完成：
+    - 前端 `npm run test`：2 test files / 12 tests passed。
+    - 前端 `npm run build`：通过；仍有 Monaco/GrapesJS 大 chunk warning。
+    - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest`：41 passed。
+    - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
+    - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed。
 
 ## 4. 核心设计决策
 
@@ -635,7 +649,8 @@ Java 安全与限制：
 - [ ] 继续保持 `doc/task-current.md` 与实际代码同步；重要修改后先更新本文档。
 - [x] 修复 Python HTML 静态沙箱误拒本地 `<script src="...">` 的三层规则漂移，并补测试。
 - [x] 新增 `doc/security-rules.md` 规则对照文档，记录前端/Python/Java 的限制值、路径规则和内容安全规则。
-- [ ] 进一步评估是否需要抽取三层安全规则常量，减少前端/Python/Java 规则漂移。
+- [x] 进一步评估并抽取三层结构安全限制常量，减少前端/Python/Java 规则漂移。
+- [ ] 评估内容安全正则是否需要统一测试夹具或解析器方案，继续降低规则漂移。
 - [x] 为前端安全校验工具补单元测试框架和测试用例。
 - [x] 修复 `previewDocument.test.ts` 测试桩的 TypeScript `erasableSyntaxOnly` 构建问题。
 - [x] 为前端 `previewDocument.ts` 补单元测试，覆盖 CSP、HTML 清理、CSS/JS 清理和标签边界转义。

@@ -1,10 +1,6 @@
 import type { GeneratedFile } from '../types/generatedProject'
+import { PROJECT_SECURITY_LIMITS } from './projectSecurityLimits'
 
-const MAX_PROJECT_FILES = 100
-const MAX_PROJECT_NAME_LENGTH = 128
-const MAX_FILE_PATH_LENGTH = 500
-const MAX_FILE_TYPE_LENGTH = 32
-const MAX_FILE_CONTENT_LENGTH = 200_000
 const EXTERNAL_HTML_URL_PATTERN = /\s(?:src|href|action|poster)\s*=\s*['"]?\s*(?:https?:)?\/\//i
 const INLINE_EVENT_HANDLER_PATTERN = /\son[a-z]+\s*=/i
 const SCRIPT_TAG_PATTERN = /<script\b([^>]*)>/gi
@@ -16,20 +12,20 @@ const SCRIPT_FILE_TYPES = new Set(['js', 'jsx', 'ts', 'tsx', 'vue'])
 
 export function validateProjectFiles(files: GeneratedFile[], projectName?: string): string | undefined {
   const seenPaths = new Set<string>()
-  if (projectName !== undefined && projectName.length > MAX_PROJECT_NAME_LENGTH) {
-    return `项目名称不能超过 ${MAX_PROJECT_NAME_LENGTH} 个字符`
+  if (projectName !== undefined && projectName.length > PROJECT_SECURITY_LIMITS.maxProjectNameLength) {
+    return `项目名称不能超过 ${PROJECT_SECURITY_LIMITS.maxProjectNameLength} 个字符`
   }
-  if (files.length > MAX_PROJECT_FILES) {
-    return `项目文件数量不能超过 ${MAX_PROJECT_FILES} 个`
+  if (files.length > PROJECT_SECURITY_LIMITS.maxProjectFiles) {
+    return `项目文件数量不能超过 ${PROJECT_SECURITY_LIMITS.maxProjectFiles} 个`
   }
 
   for (const file of files) {
     const normalizedPath = normalizeProjectPath(file.filePath)
-    if (file.filePath.length > MAX_FILE_PATH_LENGTH) {
-      return `文件路径不能超过 ${MAX_FILE_PATH_LENGTH} 个字符：${file.filePath}`
+    if (file.filePath.length > PROJECT_SECURITY_LIMITS.maxFilePathLength) {
+      return `文件路径不能超过 ${PROJECT_SECURITY_LIMITS.maxFilePathLength} 个字符：${file.filePath}`
     }
-    if (file.fileType.length > MAX_FILE_TYPE_LENGTH) {
-      return `文件类型不能超过 ${MAX_FILE_TYPE_LENGTH} 个字符：${normalizedPath}`
+    if (file.fileType.length > PROJECT_SECURITY_LIMITS.maxFileTypeLength) {
+      return `文件类型不能超过 ${PROJECT_SECURITY_LIMITS.maxFileTypeLength} 个字符：${normalizedPath}`
     }
     if (!isSafeProjectPath(file.filePath)) {
       return `文件路径不安全：${file.filePath}`
@@ -64,7 +60,7 @@ export function isSafeProjectPath(filePath: string) {
 
 function validateProjectFileContent(file: GeneratedFile, normalizedPath: string) {
   const fileType = file.fileType.toLowerCase()
-  if (file.content.length > MAX_FILE_CONTENT_LENGTH) {
+  if (file.content.length > PROJECT_SECURITY_LIMITS.maxFileContentLength) {
     return `项目文件内容过大：${normalizedPath}`
   }
   if (isHtmlFile(normalizedPath, fileType)) {

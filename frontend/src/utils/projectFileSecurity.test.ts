@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { GeneratedFile } from '../types/generatedProject'
 import { isSafeProjectPath, normalizeProjectPath, validateProjectFiles } from './projectFileSecurity'
+import { PROJECT_SECURITY_LIMITS } from './projectSecurityLimits'
 
 function file(overrides: Partial<GeneratedFile> = {}): GeneratedFile {
   return {
@@ -37,15 +38,16 @@ describe('projectFileSecurity', () => {
   })
 
   it('rejects project and file size limits', () => {
-    expect(validateProjectFiles([file()], 'x'.repeat(129))).toBe('项目名称不能超过 128 个字符')
-    expect(validateProjectFiles(Array.from({ length: 101 }, (_, index) => file({
+    expect(validateProjectFiles([file()], 'x'.repeat(PROJECT_SECURITY_LIMITS.maxProjectNameLength + 1)))
+      .toBe(`项目名称不能超过 ${PROJECT_SECURITY_LIMITS.maxProjectNameLength} 个字符`)
+    expect(validateProjectFiles(Array.from({ length: PROJECT_SECURITY_LIMITS.maxProjectFiles + 1 }, (_, index) => file({
       filePath: `file-${index}.html`,
-    })))).toBe('项目文件数量不能超过 100 个')
-    expect(validateProjectFiles([file({ filePath: 'x'.repeat(501) })]))
-      .toBe(`文件路径不能超过 500 个字符：${'x'.repeat(501)}`)
-    expect(validateProjectFiles([file({ fileType: 'x'.repeat(33) })]))
-      .toBe('文件类型不能超过 32 个字符：index.html')
-    expect(validateProjectFiles([file({ content: 'x'.repeat(200_001) })]))
+    })))).toBe(`项目文件数量不能超过 ${PROJECT_SECURITY_LIMITS.maxProjectFiles} 个`)
+    expect(validateProjectFiles([file({ filePath: 'x'.repeat(PROJECT_SECURITY_LIMITS.maxFilePathLength + 1) })]))
+      .toBe(`文件路径不能超过 ${PROJECT_SECURITY_LIMITS.maxFilePathLength} 个字符：${'x'.repeat(PROJECT_SECURITY_LIMITS.maxFilePathLength + 1)}`)
+    expect(validateProjectFiles([file({ fileType: 'x'.repeat(PROJECT_SECURITY_LIMITS.maxFileTypeLength + 1) })]))
+      .toBe(`文件类型不能超过 ${PROJECT_SECURITY_LIMITS.maxFileTypeLength} 个字符：index.html`)
+    expect(validateProjectFiles([file({ content: 'x'.repeat(PROJECT_SECURITY_LIMITS.maxFileContentLength + 1) })]))
       .toBe('项目文件内容过大：index.html')
   })
 
