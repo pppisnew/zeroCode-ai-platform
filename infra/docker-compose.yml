@@ -3,13 +3,13 @@ services:
     image: mysql:8.4
     container_name: zerocode-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: zerocode
-      MYSQL_USER: zerocode
-      MYSQL_PASSWORD: zerocode
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-zerocode}
+      MYSQL_USER: ${MYSQL_USERNAME:-mysql}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Mysql88@}
       TZ: Asia/Shanghai
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -21,7 +21,7 @@ services:
     image: redis:7.4
     container_name: zerocode-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
 
@@ -29,11 +29,11 @@ services:
     image: rabbitmq:4-management
     container_name: zerocode-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: zerocode
-      RABBITMQ_DEFAULT_PASS: zerocode
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-zerocode}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-zerocode}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
@@ -41,11 +41,11 @@ services:
     image: minio/minio:RELEASE.2024-12-18T13-15-44Z
     container_name: zerocode-minio
     environment:
-      MINIO_ROOT_USER: zerocode
-      MINIO_ROOT_PASSWORD: zerocode123
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-zerocode}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-zerocode123}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio-data:/data
     command: server /data --console-address ":9001"

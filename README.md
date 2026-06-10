@@ -26,6 +26,7 @@ doc/                         Product and architecture documents
 Recommended full local startup:
 
 ```bash
+cp .env.example .env
 scripts/start-project.sh
 ```
 
@@ -45,7 +46,7 @@ Manual infrastructure startup:
 
 ```bash
 cd infra
-docker compose up -d
+docker compose --env-file ../.env up -d
 ```
 
 ## Run Frontend

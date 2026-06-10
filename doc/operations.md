@@ -164,25 +164,42 @@ http://localhost:5173
 
 ## 4. 关键环境变量
 
+本地建议只维护根目录 `.env`：
+
+```bash
+cp .env.example .env
+```
+
+`scripts/start-project.sh` 会自动加载根目录 `.env`，并把配置传给前端、Java 服务、Python 服务和 Docker Compose。手动启动基础设施时使用：
+
+```bash
+cd infra
+docker compose --env-file ../.env up -d
+```
+
 ### 4.1 Platform Service
 
 | 环境变量 | 默认值 | 说明 |
 | --- | --- | --- |
 | `MYSQL_HOST` | `localhost` | MySQL host |
 | `MYSQL_PORT` | `3306` | MySQL port |
+| `MYSQL_ROOT_PASSWORD` | `root` | MySQL root 密码，仅 Docker Compose 初始化使用 |
 | `MYSQL_DATABASE` | `zerocode` | MySQL database |
-| `MYSQL_USERNAME` | `zerocode` | MySQL 用户 |
-| `MYSQL_PASSWORD` | `zerocode` | MySQL 密码 |
+| `MYSQL_USERNAME` | `mysql` | MySQL 用户 |
+| `MYSQL_PASSWORD` | `Mysql88@` | MySQL 密码 |
 | `REDIS_HOST` | `localhost` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
 | `RABBITMQ_HOST` | `localhost` | RabbitMQ host |
 | `RABBITMQ_PORT` | `5672` | RabbitMQ port |
+| `RABBITMQ_MANAGEMENT_PORT` | `15672` | RabbitMQ management UI 端口，仅 Docker Compose 使用 |
 | `RABBITMQ_USERNAME` | `zerocode` | RabbitMQ 用户 |
 | `RABBITMQ_PASSWORD` | `zerocode` | RabbitMQ 密码 |
 | `AI_SERVICE_BASE_URL` | `http://localhost:8000` | Python AI 服务地址 |
 | `DEPLOY_SERVICE_BASE_URL` | `http://localhost:8081` | Deploy service 地址 |
 | `PLATFORM_ARTIFACT_BASE_URL` | `http://localhost:8080/api` | 部署 artifact ZIP 回调基址 |
 | `MINIO_ENDPOINT` | `http://localhost:9000` | MinIO endpoint |
+| `MINIO_PORT` | `9000` | MinIO API 端口，仅 Docker Compose 使用 |
+| `MINIO_CONSOLE_PORT` | `9001` | MinIO Console 端口，仅 Docker Compose 使用 |
 | `MINIO_ACCESS_KEY` | `zerocode` | MinIO access key |
 | `MINIO_SECRET_KEY` | `zerocode123` | MinIO secret key |
 | `MINIO_BUCKET` | `zerocode` | MinIO bucket |

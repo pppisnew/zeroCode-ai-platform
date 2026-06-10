@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUNTIME_DIR="$ROOT_DIR/.runtime"
 PID_DIR="$RUNTIME_DIR/pids"
 LOG_DIR="$RUNTIME_DIR/logs"
+ENV_FILE="$ROOT_DIR/.env"
 
 START_INFRA=true
 AUTO_INSTALL=true
@@ -54,6 +55,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 mkdir -p "$PID_DIR" "$LOG_DIR"
+
+if [[ -f "$ENV_FILE" ]]; then
+  echo "Loading local configuration from $ENV_FILE"
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
 
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
