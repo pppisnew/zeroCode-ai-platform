@@ -131,7 +131,37 @@
 - Python sandbox：`run_static_sandbox_checks()`、`run_source_safety_checks()`
 - Java：`validateFileContent()`
 
-## 7. 预览规则
+## 7. 内容安全共享夹具
+
+共享夹具：
+
+- `doc/security-content-fixtures.json`
+
+用途：
+
+- 降低前端、Python、Java 内容安全正则漂移风险。
+- 用同一组 HTML/CSS/JS 输入验证三层规则对齐。
+- 修改内容安全规则时，必须优先更新该夹具，再同步三层测试。
+
+当前覆盖：
+
+- 允许本地 `<script src="...">`。
+- 禁止内联 `<script>`。
+- 禁止 HTML inline event handler。
+- 禁止 HTML 外部 URL。
+- 禁止外部 `<script src="https://...">`。
+- 禁止 CSS 外部 `url(...)`。
+- 禁止 `fetch(...)`、`WebSocket(...)` 等网络请求。
+- 禁止 `new Function(...)` 和字符串形式 `setTimeout(...)`。
+- 允许函数回调形式 `setTimeout(...)`。
+
+当前测试接入：
+
+- 前端：`frontend/src/utils/projectFileSecurity.test.ts`
+- Python：`ai-services/ai-orchestrator/tests/test_generation.py`
+- Java：`backend/platform-service/src/test/java/com/zerocode/platform/util/ProjectFileValidatorTests.java`
+
+## 8. 预览规则
 
 前端预览：
 
@@ -165,7 +195,7 @@ font-src data:;
 media-src data: blob:;
 ```
 
-## 8. Docker Sandbox 规则
+## 9. Docker Sandbox 规则
 
 Docker sandbox 用于 Vue/React 项目的真实构建隔离检查。
 
@@ -223,20 +253,21 @@ npm run build
 - Docker sandbox 启用态依赖本机 Docker daemon、镜像可用性和依赖缓存/网络策略。
 - 当前 install 阶段允许网络；后续可以改为预构建依赖镜像或内部 npm 缓存，使全流程离线。
 
-## 9. 已知风险
+## 10. 已知风险
 
 - 当前安全规则主要基于正则和 HTMLParser，不是完整 HTML/CSS/JS AST 安全分析。
-- 前端、Python、Java 的结构限制值已抽取到各层命名常量；内容安全正则仍存在重复规则，修改任一层时必须同步检查另外两层。
+- 前端、Python、Java 的结构限制值已抽取到各层命名常量；内容安全正则仍存在重复规则，目前通过共享夹具降低漂移风险。
 - CSP 当前允许内联脚本，是为了支持 HTML 项目预览交互；风险由 iframe sandbox、CSP `connect-src 'none'`、内容清理和保存前校验共同降低。
 - Docker sandbox 默认跳过，启用后才对 Vue/React 做真实构建隔离检查。
 - 外部依赖版本和 npm audit 风险需要单独评估，不在本文档规则范围内。
 
-## 10. 变更要求
+## 11. 变更要求
 
 修改任一安全规则时必须同步执行：
 
 - 更新本文档。
 - 更新 `doc/task-current.md`。
+- 更新 `doc/security-content-fixtures.json`。
 - 更新对应层测试。
 - 至少执行受影响层测试。
 

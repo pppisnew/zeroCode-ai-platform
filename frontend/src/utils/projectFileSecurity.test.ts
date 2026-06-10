@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest'
 
+import securityContentFixtureText from '../../../doc/security-content-fixtures.json?raw'
 import type { GeneratedFile } from '../types/generatedProject'
 import { isSafeProjectPath, normalizeProjectPath, validateProjectFiles } from './projectFileSecurity'
 import { PROJECT_SECURITY_LIMITS } from './projectSecurityLimits'
+
+type SecurityContentFixture = {
+  id: string
+  filePath: string
+  fileType: string
+  content: string
+  allowed: boolean
+  expectedFrontendError?: string
+}
+
+const securityContentFixtures = JSON.parse(securityContentFixtureText) as SecurityContentFixture[]
 
 function file(overrides: Partial<GeneratedFile> = {}): GeneratedFile {
   return {
@@ -76,5 +88,21 @@ describe('projectFileSecurity', () => {
       fileType: 'js',
       content: "new Function('alert(1)')",
     })])).toBe('项目文件不能使用动态代码执行')
+  })
+
+  it('matches shared content security fixtures', () => {
+    for (const fixture of securityContentFixtures) {
+      const result = validateProjectFiles([file({
+        filePath: fixture.filePath,
+        fileType: fixture.fileType,
+        content: fixture.content,
+      })])
+
+      if (fixture.allowed) {
+        expect(result, fixture.id).toBeUndefined()
+      } else {
+        expect(result, fixture.id).toBe(fixture.expectedFrontendError)
+      }
+    }
   })
 })

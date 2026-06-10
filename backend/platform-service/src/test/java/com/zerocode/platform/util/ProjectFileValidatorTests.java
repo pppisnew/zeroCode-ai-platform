@@ -4,12 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerocode.platform.vo.GeneratedFileVO;
 import com.zerocode.platform.vo.GeneratedProjectVO;
+import java.io.IOException;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class ProjectFileValidatorTests {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     void acceptsValidProject() {
@@ -96,6 +103,24 @@ class ProjectFileValidatorTests {
                 "Project file must not use dynamic code execution");
     }
 
+    @Test
+    void matchesSharedContentSecurityFixtures() throws IOException {
+        for (SecurityContentFixture fixture : securityContentFixtures()) {
+            GeneratedFileVO fixtureFile = file(fixture.filePath(), fixture.fileType(), fixture.content());
+
+            if (fixture.allowed()) {
+                assertThatCode(() -> ProjectFileValidator.validateProjectFiles(List.of(fixtureFile)))
+                        .as(fixture.id())
+                        .doesNotThrowAnyException();
+            } else {
+                assertThatThrownBy(() -> ProjectFileValidator.validateProjectFiles(List.of(fixtureFile)))
+                        .as(fixture.id())
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage(fixture.expectedJavaError());
+            }
+        }
+    }
+
     private static void assertRejectsContent(GeneratedFileVO file, String message) {
         assertThatThrownBy(() -> ProjectFileValidator.validateProjectFiles(List.of(file)))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -112,5 +137,34 @@ class ProjectFileValidatorTests {
 
     private static GeneratedFileVO file(String path, String type, String content) {
         return new GeneratedFileVO(path, type, content);
+    }
+
+    private static List<SecurityContentFixture> securityContentFixtures() throws IOException {
+        return OBJECT_MAPPER.readValue(
+                Files.readString(securityContentFixturePath()),
+                new TypeReference<>() {
+                });
+    }
+
+    private static Path securityContentFixturePath() {
+        Path current = Path.of(System.getProperty("user.dir")).toAbsolutePath();
+        while (current != null) {
+            Path candidate = current.resolve("doc/security-content-fixtures.json");
+            if (Files.exists(candidate)) {
+                return candidate;
+            }
+            current = current.getParent();
+        }
+        throw new IllegalStateException("Cannot find doc/security-content-fixtures.json");
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record SecurityContentFixture(
+            String id,
+            String filePath,
+            String fileType,
+            String content,
+            boolean allowed,
+            String expectedJavaError) {
     }
 }

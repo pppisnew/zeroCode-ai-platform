@@ -9,7 +9,7 @@ Phase 3 的部署链路先实现最小可验证能力：
 - 支持 Vue/React Vite 项目。
 - 不在平台服务内直接执行用户项目构建或部署命令。
 
-当前已新增 `deploy-service` 最小骨架和 executor routing 边界。Docker executor 开始进入受控真实执行路径；默认仍为 dry-run，不执行真实命令。GitHub Actions、Kubernetes 自动部署执行器仍只返回 skipped。
+当前已新增 `deploy-service`、executor routing 边界和 Docker/GitHub Actions/Kubernetes 三类受控执行器。默认仍为 dry-run 或禁用状态，不执行真实命令；只有在对应 executor 显式启用且 `execution-mode=real` 时，才进入受控真实执行路径。
 
 ## 2. 当前实现
 
@@ -101,17 +101,17 @@ http://localhost:8080
 - 部署包生成器不覆盖用户已有部署文件。
 - Vue/React 构建验证由 Python Docker sandbox 可选执行。
 
-## 7. 后续 deploy-service 边界
+## 7. 当前 deploy-service 边界
 
-当前 `deploy-service` 最小骨架负责：
+当前 `deploy-service` 负责：
 
 - 接收部署请求。
 - 校验 appId、versionNo、projectType、artifactUrl、target。
 - 创建部署记录。
 - 将部署记录持久化到本地 JSON 文件。
-- 返回 `planned` 状态。
+- 按执行器结果返回 `planned`、`skipped`、`succeeded` 或 `failed` 状态。
 - 返回建议命令。
-- 通过 dry-run executor 生成执行日志。
+- 通过 dry-run 或目标执行器生成执行日志。
 - 使用统一 envelope。
 
 当前持久化：
@@ -128,10 +128,14 @@ http://localhost:8080
 当前执行器：
 
 - 接口：`DeploymentExecutor`
-- 实现：`DryRunDeploymentExecutor`
-- 状态：只返回 `planned`
-- 日志：记录 target、artifact、planned command
-- 安全边界：不执行真实 Docker、GitHub Actions、Kubernetes 命令
+- fallback 实现：`DryRunDeploymentExecutor`
+- 目标实现：`DockerDeploymentExecutor`、`GithubActionsDeploymentExecutor`、`KubernetesDeploymentExecutor`
+- 默认状态：未显式启用目标执行器时返回 `planned`
+- 显式启用但未进入 real mode：返回 `skipped`
+- real mode 成功：返回 `succeeded`
+- real mode 失败：返回 `failed`
+- 日志：记录 target、artifact、planned command 和执行摘要；敏感凭据不写入日志
+- 安全边界：默认不执行真实 Docker、GitHub Actions、Kubernetes 命令；真实执行必须显式配置启用
 
 执行器路由：
 
@@ -229,7 +233,7 @@ Kubernetes executor 配置：
 | `failed` | 真实执行器执行失败 |
 | `skipped` | 环境或配置不可用，跳过执行 |
 
-当前 dry-run executor 只会返回 `planned`。后续真实 Docker/GitHub Actions/Kubernetes executor 必须显式写入 `running`、`succeeded`、`failed` 或 `skipped`。
+当前 dry-run executor 只会返回 `planned`。Docker/GitHub Actions/Kubernetes 真实执行器已实现受控 real mode，并会按执行结果返回 `succeeded`、`failed` 或 `skipped`。`running` 已作为状态契约保留，后续异步部署或日志流式化时使用。
 
 当前 API：
 
@@ -266,14 +270,13 @@ Content-Type: application/json
 GET /deployments/{id}
 ```
 
-后续完整 `deploy-service` 应负责：
+后续生产化 `deploy-service` 应继续增强：
 
-- 接收已保存版本。
-- 拉取或生成部署包。
-- 在隔离环境中构建镜像。
-- 推送镜像到镜像仓库。
-- 创建部署记录。
-- 对接 GitHub Actions 或 Kubernetes。
-- 返回部署状态、日志和访问 URL。
+- 凭据管理和权限隔离。
+- 镜像仓库、tag、访问 URL 的明确契约。
+- 异步执行、状态轮询和日志流。
+- 超时、重试和取消部署。
+- DB 持久化替换本地 JSON 文件。
+- 真实环境中的 Docker/GitHub Actions/Kubernetes 集成验收。
 
 后续不应由 `platform-service` 直接执行用户项目构建或生产部署命令。

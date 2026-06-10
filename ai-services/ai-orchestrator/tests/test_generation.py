@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
@@ -24,6 +27,14 @@ from app.tools.html_sandbox import (
 from app.tools.project_repair import repair_package_json, repair_project_files
 from app.tools.project_security import is_safe_project_path, validate_project_file_paths
 from app.workflows.html_generation_workflow import inspect_html_generation_workflow
+
+SECURITY_CONTENT_FIXTURE_PATH = (
+    Path(__file__).resolve().parents[3] / "doc" / "security-content-fixtures.json"
+)
+
+
+def load_security_content_fixtures() -> list[dict]:
+    return json.loads(SECURITY_CONTENT_FIXTURE_PATH.read_text(encoding="utf-8"))
 
 
 def test_generate_html_project_returns_structured_files() -> None:
@@ -517,6 +528,24 @@ def test_static_sandbox_allows_regular_function_callbacks() -> None:
     )
 
     assert "script.js must not use dynamic code execution" not in result.issues
+
+
+def test_static_sandbox_matches_shared_content_security_fixtures() -> None:
+    for fixture in load_security_content_fixtures():
+        result = run_static_sandbox_checks(
+            [
+                GeneratedFile(
+                    filePath=fixture["filePath"],
+                    fileType=fixture["fileType"],
+                    content=fixture["content"],
+                ),
+            ],
+        )
+
+        if fixture["allowed"]:
+            assert result.issues == [], fixture["id"]
+        else:
+            assert fixture["expectedPythonIssue"] in result.issues, fixture["id"]
 
 
 def test_docker_sandbox_skips_when_disabled(monkeypatch) -> None:

@@ -521,6 +521,33 @@ Java 安全与限制：
   - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
   - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed。
   - deploy-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed。
+- 当前文档一致性调整正在进行：
+  - 已发现 `doc/deployment.md` 顶部和 deploy-service 边界仍保留早期 dry-run/skipped 口径。
+  - 已发现本文档“决策 6”和“下一步行动”仍保留早期目标执行器未实现真实路径的描述。
+  - 本轮目标是同步文档口径：Docker/GitHub Actions/Kubernetes executor 已具备受控 real mode；默认仍禁用或 dry-run，不会误执行真实生产命令。
+- 当前进入内容安全规则漂移治理：
+  - 计划新增共享夹具 `doc/security-content-fixtures.json`。
+  - 前端 Vitest、Python pytest、Java JUnit 将读取同一份夹具，验证 HTML/CSS/JS 内容安全规则一致性。
+  - 夹具优先覆盖本地 script src、内联 script、inline event、外部 HTML/CSS URL、网络请求、动态代码执行和安全 setTimeout callback。
+- 内容安全规则漂移治理已完成：
+  - 新增 `doc/security-content-fixtures.json` 作为三层共享内容安全测试夹具。
+  - 前端 `projectFileSecurity.test.ts` 已读取共享夹具并校验保存前内容安全规则。
+  - Python `test_generation.py` 已读取共享夹具并校验 `run_static_sandbox_checks()`。
+  - Java `ProjectFileValidatorTests` 已读取共享夹具并校验 `ProjectFileValidator.validateProjectFiles()`。
+  - 已更新 `doc/security-rules.md`，记录共享夹具的覆盖范围、测试接入和变更要求。
+  - 受影响测试已通过：前端 `npm run test` 13 passed；Python `uv run pytest` 42 passed；platform-service Maven 测试 42 passed。
+- 前端分包优化已完成：
+  - `frontend/vite.config.ts` 新增 `build.rolldownOptions.output.manualChunks`，将 Arco 和 Vue/Pinia 基础 vendor 显式拆分。
+  - `chunkSizeWarningLimit` 调整为 3000，用于接受 Monaco/GrapesJS 这类已懒加载的重型编辑器 chunk。
+  - `npm run build` 已通过；入口 JS 从约 856 kB 降至约 25 kB，大 chunk warning 已消失。
+- 本轮最终全面测试已完成：
+  - 时间：2026-06-10 16:19 Asia/Shanghai。
+  - 前端 `npm run test`：2 test files / 13 tests passed。
+  - 前端 `npm run build`：通过；入口 JS 约 25 kB，大 chunk warning 已消失。
+  - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest`：42 passed。
+  - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
+  - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：42 tests passed。
+  - deploy-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed。
 
 ## 4. 核心设计决策
 
@@ -642,23 +669,25 @@ Java 安全与限制：
 
 - deploy-service 默认使用 `DryRunDeploymentExecutor`。
 - Docker/GitHub Actions/Kubernetes executor 只有配置显式启用时才参与路由。
-- 当前目标执行器即使启用也只返回 `skipped`，不执行真实命令。
+- 目标执行器已具备受控 real mode：Docker 可下载 artifact 并执行 `docker build`/可选 `docker push`，GitHub Actions 可 dispatch workflow，Kubernetes 可生成 manifest 并执行 `kubectl apply`。
+- 真实路径必须同时满足 `enabled=true` 和 `execution-mode=real`，且依赖配置完整；否则返回 `planned` 或 `skipped`，不执行真实命令。
 
 选择原因：
 
 - 文档要求 deploy-service、Docker、GitHub Actions、Kubernetes 方向，但当前没有生产级凭据、镜像仓库、集群和工作流规范。
 - 平台不能默认在宿主机执行用户生成项目的构建或部署命令。
-- 先完成可测试的服务边界和前端闭环，后续再替换为生产级执行器。
+- 通过显式配置和 runner/client 抽象实现可测试的真实执行边界，避免默认环境误触发生产部署。
 
 替代方案：
 
 - platform-service 直接执行 Docker 命令。
 - deploy-service 默认执行 Docker/GitHub Actions/Kubernetes 命令。
+- 继续只保留 skipped 占位 executor。
 
 当前风险：
 
-- 当前部署能力仍是计划/占位执行，不能完成生产级发布。
-- 生产级执行器需要补充凭据管理、镜像仓库、日志流、超时、重试和权限隔离。
+- 真实执行能力依赖外部 Docker daemon、GitHub token/workflow、Kubernetes 集群和镜像仓库配置。
+- 生产级部署仍需要补充凭据管理、日志流、超时、重试、访问 URL 回写、DB 持久化和权限隔离。
 
 ## 5. 待办事项（TODO）
 
@@ -666,7 +695,7 @@ Java 安全与限制：
 - [x] 修复 Python HTML 静态沙箱误拒本地 `<script src="...">` 的三层规则漂移，并补测试。
 - [x] 新增 `doc/security-rules.md` 规则对照文档，记录前端/Python/Java 的限制值、路径规则和内容安全规则。
 - [x] 进一步评估并抽取三层结构安全限制常量，减少前端/Python/Java 规则漂移。
-- [ ] 评估内容安全正则是否需要统一测试夹具或解析器方案，继续降低规则漂移。
+- [x] 新增内容安全共享测试夹具，并接入前端/Python/Java 三层测试，继续降低规则漂移。
 - [x] 为前端安全校验工具补单元测试框架和测试用例。
 - [x] 修复 `previewDocument.test.ts` 测试桩的 TypeScript `erasableSyntaxOnly` 构建问题。
 - [x] 为前端 `previewDocument.ts` 补单元测试，覆盖 CSP、HTML 清理、CSS/JS 清理和标签边界转义。
@@ -689,7 +718,8 @@ Java 安全与限制：
 - [x] 关联 GitHub remote 并推送 main 分支。
 - [x] Phase 3：实现生产级自动部署执行器、GitHub Actions/Kubernetes 集成。
 - [x] Phase 3：实现 Docker executor 受控真实执行路径。
-- [ ] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
+- [x] 修正 `doc/deployment.md` 与 `doc/task-current.md` 中关于 deploy-service executor 状态的旧口径。
+- [x] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
 
 ## 6. 下一步行动
 
@@ -702,22 +732,22 @@ sed -n '1,260p' doc/task-current.md
 然后继续处理 TODO 中最高优先级事项：
 
 ```text
-抽取三层安全规则常量或补充前端安全校验单元测试。
+检查 `git status --short` 与 `git diff --stat`；
+确认只有本轮文档、夹具、测试和 Vite 配置变更；
+然后提交并推送。
 ```
 
 如果用户要求继续“下一步”，建议优先执行：
 
 ```text
-为前端 projectFileSecurity.ts 增加测试能力；
-若不引入新依赖，则先评估 package.json 是否已有测试框架，
-再决定是否安装 Vitest 或改为轻量脚本测试。
+提交并推送本轮变更；
+提交信息建议：`test: add shared content security fixtures`。
 ```
 
 当前下一步建议为：
 
 ```text
-后续继续开发前：
 先执行 `git status --short` 检查工作区；
-确认没有 node_modules、dist、target、.venv、.env 等本地文件进入暂存区；
-完成修改后执行 `git add .`、`git commit -m "<type>: <summary>"`、`git push`。
+若文档已修改，检查 `doc/task-current.md` 与对应专题文档口径一致；
+完成修改后按需提交并推送。
 ```

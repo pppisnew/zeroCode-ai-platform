@@ -1,0 +1,117 @@
+[
+  {
+    "id": "allow-local-html-script-src",
+    "description": "Local script src is allowed for generated Vite entry scripts.",
+    "filePath": "index.html",
+    "fileType": "html",
+    "content": "<main>Ready</main><script type=\"module\" src=\"/src/main.ts\"></script>",
+    "allowed": true
+  },
+  {
+    "id": "reject-inline-html-script",
+    "description": "Inline HTML scripts must be rejected.",
+    "filePath": "index.html",
+    "fileType": "html",
+    "content": "<main><script>alert(1)</script></main>",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能内联脚本",
+    "expectedPythonIssue": "index.html must not inline scripts; use script.js",
+    "expectedJavaError": "Project file must not inline scripts"
+  },
+  {
+    "id": "reject-inline-event-handler",
+    "description": "Inline event handlers must be rejected.",
+    "filePath": "index.html",
+    "fileType": "html",
+    "content": "<main><button onclick=\"alert(1)\">Run</button></main>",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能使用内联事件处理器",
+    "expectedPythonIssue": "index.html must not use inline event handler: onclick",
+    "expectedJavaError": "Project file must not use inline event handlers"
+  },
+  {
+    "id": "reject-external-html-url",
+    "description": "External HTML resource URLs must be rejected.",
+    "filePath": "index.html",
+    "fileType": "html",
+    "content": "<main><img src=https://example.com/logo.png></main>",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能引用外部 URL",
+    "expectedPythonIssue": "index.html references external URL: https://example.com/logo.png",
+    "expectedJavaError": "Project file must not reference external URLs"
+  },
+  {
+    "id": "reject-external-html-script-src",
+    "description": "External script src URLs must be rejected without being classified as inline scripts.",
+    "filePath": "index.html",
+    "fileType": "html",
+    "content": "<main>Ready</main><script src=\"https://example.com/app.js\"></script>",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能引用外部 URL",
+    "expectedPythonIssue": "index.html references external URL: https://example.com/app.js",
+    "expectedJavaError": "Project file must not reference external URLs"
+  },
+  {
+    "id": "reject-external-css-url",
+    "description": "External CSS url() references must be rejected.",
+    "filePath": "style.css",
+    "fileType": "css",
+    "content": "main { background-image: url(\"https://example.com/bg.png\"); }",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能引用外部 URL",
+    "expectedPythonIssue": "style.css must not reference external URLs",
+    "expectedJavaError": "Project file must not reference external URLs"
+  },
+  {
+    "id": "reject-fetch-request",
+    "description": "JavaScript fetch calls must be rejected.",
+    "filePath": "script.js",
+    "fileType": "js",
+    "content": "fetch('/api/data')",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能执行网络请求",
+    "expectedPythonIssue": "script.js must not perform network requests",
+    "expectedJavaError": "Project file must not perform network requests"
+  },
+  {
+    "id": "reject-websocket-request",
+    "description": "JavaScript WebSocket calls must be rejected.",
+    "filePath": "script.js",
+    "fileType": "js",
+    "content": "const socket = new WebSocket('wss://example.com/ws')",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能执行网络请求",
+    "expectedPythonIssue": "script.js must not perform network requests",
+    "expectedJavaError": "Project file must not perform network requests"
+  },
+  {
+    "id": "reject-new-function",
+    "description": "Dynamic Function construction must be rejected.",
+    "filePath": "script.js",
+    "fileType": "js",
+    "content": "new Function('alert(1)')",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能使用动态代码执行",
+    "expectedPythonIssue": "script.js must not use dynamic code execution",
+    "expectedJavaError": "Project file must not use dynamic code execution"
+  },
+  {
+    "id": "reject-string-settimeout",
+    "description": "String-based setTimeout must be rejected.",
+    "filePath": "script.js",
+    "fileType": "js",
+    "content": "setTimeout('alert(1)', 100)",
+    "allowed": false,
+    "expectedFrontendError": "项目文件不能使用动态代码执行",
+    "expectedPythonIssue": "script.js must not use dynamic code execution",
+    "expectedJavaError": "Project file must not use dynamic code execution"
+  },
+  {
+    "id": "allow-function-settimeout",
+    "description": "Function callback setTimeout is allowed.",
+    "filePath": "script.js",
+    "fileType": "js",
+    "content": "setTimeout(function () { console.log('ready') }, 100)",
+    "allowed": true
+  }
+]
