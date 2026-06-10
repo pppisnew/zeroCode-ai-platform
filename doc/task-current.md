@@ -556,6 +556,14 @@ Java 安全与限制：
   - 新增 `doc/operations.md`，覆盖服务拓扑、启动顺序、环境变量、验证命令、部署执行器安全边界、数据与备份、日志排障和变更流程。
   - 根 `README.md` 已新增 Operations Documents 索引，指向运维、部署、安全、任务状态和 Git 文档。
   - `doc/sql.md` 已同步 `infra/mysql/init.sql`，补齐字段约束、索引、`chat_message` 和 `ai_task` 表。
+- 当前进入新人教学文档整理：
+  - 目标是将“高级工程师带新人”式项目讲解整理为可长期阅读的 Markdown 文档。
+  - 计划新增 `doc/project-learning-guide.md`，严格覆盖项目一句话、业务问题、整体流程、架构、技术栈、目录、核心模块、数据流、设计思想、难点和学习路线。
+  - 本轮仅新增教学文档，不修改运行时代码。
+- 新人教学文档整理已完成：
+  - 新增 `doc/project-learning-guide.md`。
+  - 根 `README.md` 的 Operations Documents 已加入该学习指南入口。
+  - 文档按用户要求的 11 个章节组织，面向完全没有经验的新手开发者。
 
 ## 4. 核心设计决策
 
@@ -729,6 +737,7 @@ Java 安全与限制：
 - [x] 修正 `doc/deployment.md` 与 `doc/task-current.md` 中关于 deploy-service executor 状态的旧口径。
 - [x] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
 - [x] 新增并维护后期运维文档，方便接手人员启动、验证、排障和恢复任务上下文。
+- [x] 新增新人项目学习文档，帮助无经验开发者按顺序理解并阅读代码。
 
 ## 6. 下一步行动
 
@@ -741,7 +750,7 @@ sed -n '1,260p' doc/task-current.md
 然后继续处理 TODO 中最高优先级事项：
 
 ```text
-检查 `doc/operations.md`、`README.md`、`doc/sql.md` 的运维信息是否与当前配置一致；
+检查 `doc/project-learning-guide.md` 章节结构和 README 入口；
 执行文档级检查；
 然后提交并推送本轮文档变更。
 ```
@@ -749,8 +758,8 @@ sed -n '1,260p' doc/task-current.md
 如果用户要求继续“下一步”，建议优先执行：
 
 ```text
-提交并推送本轮运维文档变更；
-提交信息建议：`docs: add operations runbook`。
+提交并推送本轮新人教学文档变更；
+提交信息建议：`docs: add project learning guide`。
 ```
 
 当前下一步建议为：

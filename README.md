@@ -15,6 +15,7 @@ doc/                         Product and architecture documents
 ## Operations Documents
 
 - `doc/operations.md`: startup, configuration, verification, troubleshooting, and maintenance runbook.
+- `doc/project-learning-guide.md`: beginner-friendly project walkthrough and code reading guide.
 - `doc/deployment.md`: deployment package and deploy-service executor boundaries.
 - `doc/security-rules.md`: frontend/Python/Java security rule alignment.
 - `doc/task-current.md`: current task state and recovery context.
