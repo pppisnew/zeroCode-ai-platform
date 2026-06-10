@@ -173,11 +173,33 @@ Docker executor 配置：
 | `zerocode.deploy.executors.docker.image-repository-prefix` | `DEPLOY_DOCKER_IMAGE_REPOSITORY_PREFIX` | `zerocode` | 镜像名前缀 |
 | `zerocode.deploy.executors.docker.push-enabled` | `DEPLOY_DOCKER_PUSH_ENABLED` | `false` | 是否执行 `docker push` |
 
-当前 GitHub Actions/Kubernetes executor 显式启用后仍为安全占位实现：
+当前 GitHub Actions executor 的执行边界：
+
+- `zerocode.deploy.executors.github-actions.enabled=false` 时不参与路由，继续使用 dry-run fallback。
+- `zerocode.deploy.executors.github-actions.enabled=true` 但 `execution-mode` 不是 `real` 时，返回 `skipped`，不调用 GitHub API。
+- 只有同时满足 `enabled=true`、`execution-mode=real` 且 token/owner/repo/workflow/ref 配置完整时，才会调用 GitHub workflow dispatch API。
+- dispatch 输入包含 `app_id`、`version_no`、`project_type`、`artifact_url`，由 GitHub Actions workflow 负责后续构建、推送和发布。
+- GitHub API 调用通过 `GithubActionsClient` 抽象执行，便于测试中替换为 fake client。
+- GitHub 返回 `204 No Content` 视为 `succeeded`；配置不完整视为 `skipped`；API 调用失败视为 `failed`。
+
+GitHub Actions executor 配置：
+
+| 配置项 | 环境变量 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `zerocode.deploy.executors.github-actions.enabled` | `DEPLOY_GITHUB_ACTIONS_EXECUTOR_ENABLED` | `false` | 是否注册 GitHub Actions target executor |
+| `zerocode.deploy.executors.github-actions.execution-mode` | `DEPLOY_GITHUB_ACTIONS_EXECUTION_MODE` | `dry-run` | 只有 `real` 才调用 GitHub API |
+| `zerocode.deploy.executors.github-actions.api-base-url` | `DEPLOY_GITHUB_ACTIONS_API_BASE_URL` | `https://api.github.com` | GitHub API base URL |
+| `zerocode.deploy.executors.github-actions.token` | `DEPLOY_GITHUB_ACTIONS_TOKEN` | 空 | GitHub token，不允许写入日志 |
+| `zerocode.deploy.executors.github-actions.owner` | `DEPLOY_GITHUB_ACTIONS_OWNER` | 空 | 仓库 owner |
+| `zerocode.deploy.executors.github-actions.repo` | `DEPLOY_GITHUB_ACTIONS_REPO` | 空 | 仓库名 |
+| `zerocode.deploy.executors.github-actions.workflow-id` | `DEPLOY_GITHUB_ACTIONS_WORKFLOW_ID` | 空 | workflow 文件名或 id |
+| `zerocode.deploy.executors.github-actions.ref` | `DEPLOY_GITHUB_ACTIONS_REF` | `main` | workflow dispatch ref |
+
+当前 Kubernetes executor 显式启用后仍为安全占位实现：
 
 - 返回部署状态 `skipped`。
 - 写入 executionLogs，说明当前构建未实现真实命令执行。
-- 不调用 GitHub API、kubectl 或 Kubernetes API。
+- 不调用 kubectl 或 Kubernetes API。
 
 部署状态：
 

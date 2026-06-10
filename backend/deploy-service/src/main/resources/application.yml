@@ -18,5 +18,12 @@ zerocode:
         push-enabled: ${DEPLOY_DOCKER_PUSH_ENABLED:false}
       github-actions:
         enabled: ${DEPLOY_GITHUB_ACTIONS_EXECUTOR_ENABLED:false}
+        execution-mode: ${DEPLOY_GITHUB_ACTIONS_EXECUTION_MODE:dry-run}
+        api-base-url: ${DEPLOY_GITHUB_ACTIONS_API_BASE_URL:https://api.github.com}
+        token: ${DEPLOY_GITHUB_ACTIONS_TOKEN:}
+        owner: ${DEPLOY_GITHUB_ACTIONS_OWNER:}
+        repo: ${DEPLOY_GITHUB_ACTIONS_REPO:}
+        workflow-id: ${DEPLOY_GITHUB_ACTIONS_WORKFLOW_ID:}
+        ref: ${DEPLOY_GITHUB_ACTIONS_REF:main}
       kubernetes:
         enabled: ${DEPLOY_KUBERNETES_EXECUTOR_ENABLED:false}

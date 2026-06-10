@@ -448,6 +448,20 @@ Java 安全与限制：
   - 最新 deploy-service 测试：
     - 命令：`mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`
     - 结果：19 tests passed，BUILD SUCCESS。
+- GitHub Actions executor 受控 workflow dispatch 路径已完成并通过测试。
+  - 本轮设计边界已先写入 `doc/deployment.md`。
+  - 默认仍不调用 GitHub API；必须同时配置 `enabled=true` 和 `execution-mode=real`。
+  - real mode 还需要 token、owner、repo、workflow-id、ref 配置完整。
+  - workflow dispatch 输入包含 app/version/project/artifact，由 GitHub Actions workflow 承接后续生产部署。
+  - API 调用将通过 `GithubActionsClient` 抽象，单元测试使用 fake client。
+  - 已新增 `GithubActionsClient`、`GithubActionsDispatchCommand`、`GithubActionsDispatchResult`、`HttpGithubActionsClient`。
+  - `GithubActionsDeploymentExecutor` 已实现 real mode workflow dispatch。
+  - `application.yml` 已新增 GitHub Actions executor real mode 配置项。
+  - 已新增 `GithubActionsDeploymentExecutorTests` 和 `HttpGithubActionsClientTests`，覆盖 dry-run、配置缺失、dispatch 成功、dispatch 失败和 HTTP 请求格式。
+  - 首次运行测试时，本地沙箱禁止 `HttpServer` 绑定 socket；已将 `HttpGithubActionsClientTests` 改为注入 fake `HttpClient`，避免单元测试依赖真实端口。
+  - 最新 deploy-service 测试：
+    - 命令：`mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`
+    - 结果：24 tests passed，BUILD SUCCESS。
 
 ## 4. 核心设计决策
 
