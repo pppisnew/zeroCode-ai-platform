@@ -433,7 +433,8 @@ Java 安全与限制：
   - 已设置 `origin` remote。
   - 已执行 `git add .`。
   - 已检查暂存内容：`node_modules`、`dist`、`target`、`.venv` 未进入暂存区；Python `__init__.py` 已进入暂存区。
-  - 准备创建首次提交后推送到远端。
+  - 已创建首次提交：`3fe98bb chore: initialize repository`。
+  - 已执行 `git push -u origin main`，本地 `main` 已跟踪 `origin/main`。
 
 ## 4. 核心设计决策
 
@@ -598,7 +599,7 @@ Java 安全与限制：
 - [x] Phase 3：补充 deploy-service/platform-service 配置收口。
 - [x] Phase 3：补充部署链路集成测试。
 - [x] 初始化 Git 仓库并创建 Git 说明文档。
-- [ ] 关联 GitHub remote 并推送 main 分支。
+- [x] 关联 GitHub remote 并推送 main 分支。
 - [ ] Phase 3：实现生产级自动部署执行器、GitHub Actions/Kubernetes 集成。
 - [ ] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
 
@@ -627,8 +628,8 @@ sed -n '1,260p' doc/task-current.md
 当前下一步建议为：
 
 ```text
-如需创建首次提交：
-先执行 `git status --short` 检查未跟踪文件；
-确认没有 node_modules、dist、target、.venv、.env 等本地文件后，
-执行 `git add .` 和 `git commit -m "chore: initialize repository"`。
+后续继续开发前：
+先执行 `git status --short` 检查工作区；
+确认没有 node_modules、dist、target、.venv、.env 等本地文件进入暂存区；
+完成修改后执行 `git add .`、`git commit -m "<type>: <summary>"`、`git push`。
 ```

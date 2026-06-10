@@ -14,7 +14,15 @@ git init -b main
 main
 ```
 
-当前仓库仍未创建初始提交。`git status --short` 显示项目文件处于未跟踪状态。
+当前仓库已创建首次提交并推送到 GitHub。
+
+远端仓库：
+
+```text
+https://github.com/pppisnew/zeroCode-ai-platform.git
+```
+
+本地 `main` 已设置为跟踪 `origin/main`。
 
 ## 2. 忽略规则
 
@@ -39,7 +47,7 @@ main
 
 ## 3. 建议首次提交流程
 
-首次提交前建议执行：
+后续提交前建议执行：
 
 ```bash
 git status --short
@@ -59,11 +67,12 @@ git status --short
 ```bash
 git add .
 git status --short
-git commit -m "chore: initialize repository"
+git commit -m "<type>: <summary>"
+git push
 ```
 
 ## 4. 当前注意事项
 
-- 本次只完成 Git 初始化和文档创建，尚未执行 `git add` 或 `git commit`。
+- 首次提交已完成并推送到 `origin/main`。
 - 后续创建提交前，应先确认生成产物和本地环境文件没有被纳入暂存区。
 - 当前任务状态仍以 `doc/task-current.md` 作为恢复入口。
