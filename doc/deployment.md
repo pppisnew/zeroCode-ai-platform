@@ -195,11 +195,29 @@ GitHub Actions executor 配置：
 | `zerocode.deploy.executors.github-actions.workflow-id` | `DEPLOY_GITHUB_ACTIONS_WORKFLOW_ID` | 空 | workflow 文件名或 id |
 | `zerocode.deploy.executors.github-actions.ref` | `DEPLOY_GITHUB_ACTIONS_REF` | `main` | workflow dispatch ref |
 
-当前 Kubernetes executor 显式启用后仍为安全占位实现：
+当前 Kubernetes executor 的执行边界：
 
-- 返回部署状态 `skipped`。
-- 写入 executionLogs，说明当前构建未实现真实命令执行。
-- 不调用 kubectl 或 Kubernetes API。
+- `zerocode.deploy.executors.kubernetes.enabled=false` 时不参与路由，继续使用 dry-run fallback。
+- `zerocode.deploy.executors.kubernetes.enabled=true` 但 `execution-mode` 不是 `real` 时，返回 `skipped`，不调用 `kubectl`。
+- 只有同时满足 `enabled=true` 和 `execution-mode=real` 时，才会生成 Kubernetes manifest 并执行 `kubectl apply`。
+- 当前 manifest 由 deploy-service 生成，包含 Deployment 和 Service。
+- 镜像名按 `image-repository-prefix/app-{appId}:v{versionNo}` 生成，应与 Docker/GitHub Actions 构建推送出的镜像保持一致。
+- `kubeconfig` 可选；配置后通过 `KUBECONFIG` 环境变量传给 `kubectl`，不会写入日志。
+- Kubernetes 命令通过 `KubernetesCommandRunner` 抽象执行，便于测试中替换为 fake runner。
+- kubectl exit code `0` 视为 `succeeded`；非 0 或异常视为 `failed`。
+
+Kubernetes executor 配置：
+
+| 配置项 | 环境变量 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `zerocode.deploy.executors.kubernetes.enabled` | `DEPLOY_KUBERNETES_EXECUTOR_ENABLED` | `false` | 是否注册 Kubernetes target executor |
+| `zerocode.deploy.executors.kubernetes.execution-mode` | `DEPLOY_KUBERNETES_EXECUTION_MODE` | `dry-run` | 只有 `real` 才执行 kubectl |
+| `zerocode.deploy.executors.kubernetes.namespace` | `DEPLOY_KUBERNETES_NAMESPACE` | `default` | 部署命名空间 |
+| `zerocode.deploy.executors.kubernetes.kubectl-binary` | `DEPLOY_KUBERNETES_KUBECTL_BINARY` | `kubectl` | kubectl 可执行文件 |
+| `zerocode.deploy.executors.kubernetes.kubeconfig` | `DEPLOY_KUBERNETES_KUBECONFIG` | 空 | 可选 kubeconfig 路径 |
+| `zerocode.deploy.executors.kubernetes.command-timeout-seconds` | `DEPLOY_KUBERNETES_COMMAND_TIMEOUT_SECONDS` | `300` | kubectl 命令超时 |
+| `zerocode.deploy.executors.kubernetes.image-repository-prefix` | `DEPLOY_KUBERNETES_IMAGE_REPOSITORY_PREFIX` | `zerocode` | 镜像名前缀 |
+| `zerocode.deploy.executors.kubernetes.service-port` | `DEPLOY_KUBERNETES_SERVICE_PORT` | `80` | Service 端口 |
 
 部署状态：
 

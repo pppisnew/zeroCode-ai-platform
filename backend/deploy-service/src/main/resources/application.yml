@@ -27,3 +27,10 @@ zerocode:
         ref: ${DEPLOY_GITHUB_ACTIONS_REF:main}
       kubernetes:
         enabled: ${DEPLOY_KUBERNETES_EXECUTOR_ENABLED:false}
+        execution-mode: ${DEPLOY_KUBERNETES_EXECUTION_MODE:dry-run}
+        namespace: ${DEPLOY_KUBERNETES_NAMESPACE:default}
+        kubectl-binary: ${DEPLOY_KUBERNETES_KUBECTL_BINARY:kubectl}
+        kubeconfig: ${DEPLOY_KUBERNETES_KUBECONFIG:}
+        command-timeout-seconds: ${DEPLOY_KUBERNETES_COMMAND_TIMEOUT_SECONDS:300}
+        image-repository-prefix: ${DEPLOY_KUBERNETES_IMAGE_REPOSITORY_PREFIX:zerocode}
+        service-port: ${DEPLOY_KUBERNETES_SERVICE_PORT:80}

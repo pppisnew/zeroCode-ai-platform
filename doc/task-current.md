@@ -462,6 +462,19 @@ Java 安全与限制：
   - 最新 deploy-service 测试：
     - 命令：`mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`
     - 结果：24 tests passed，BUILD SUCCESS。
+- Kubernetes executor 受控 `kubectl apply` 路径已完成并通过测试。
+  - 本轮设计边界已先写入 `doc/deployment.md`。
+  - 默认仍不调用 `kubectl`；必须同时配置 `enabled=true` 和 `execution-mode=real`。
+  - real mode 生成 Deployment/Service manifest，并通过 `KubernetesCommandRunner` 执行 `kubectl apply`。
+  - `kubeconfig` 通过环境变量传给 runner，不写入日志。
+  - 单元测试将使用 fake runner，避免触碰真实 Kubernetes 集群。
+  - 已新增 `KubernetesCommandRunner`、`KubernetesCommandResult`、`ProcessKubernetesCommandRunner`。
+  - `KubernetesDeploymentExecutor` 已实现 real mode：生成 Deployment/Service manifest，执行 `kubectl apply`，按 exit code 返回 `succeeded/failed`。
+  - `application.yml` 已新增 Kubernetes executor real mode 配置项。
+  - 已新增 `KubernetesDeploymentExecutorTests`，覆盖 dry-run skipped、manifest apply 成功、kubectl failed、kubeconfig 环境变量传递。
+  - 最新 deploy-service 测试：
+    - 命令：`mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`
+    - 结果：27 tests passed，BUILD SUCCESS。
 
 ## 4. 核心设计决策
 
@@ -627,7 +640,7 @@ Java 安全与限制：
 - [x] Phase 3：补充部署链路集成测试。
 - [x] 初始化 Git 仓库并创建 Git 说明文档。
 - [x] 关联 GitHub remote 并推送 main 分支。
-- [ ] Phase 3：实现生产级自动部署执行器、GitHub Actions/Kubernetes 集成。
+- [x] Phase 3：实现生产级自动部署执行器、GitHub Actions/Kubernetes 集成。
 - [x] Phase 3：实现 Docker executor 受控真实执行路径。
 - [ ] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
 
