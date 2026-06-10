@@ -1,0 +1,46 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: platform-service
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:zerocode}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME:zerocode}
+    password: ${MYSQL_PASSWORD:zerocode}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:zerocode}
+    password: ${RABBITMQ_PASSWORD:zerocode}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+sa-token:
+  token-name: Authorization
+  timeout: 2592000
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+
+zerocode:
+  ai-service:
+    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
+  deploy-service:
+    base-url: ${DEPLOY_SERVICE_BASE_URL:http://localhost:8081}
+    artifact-base-url: ${PLATFORM_ARTIFACT_BASE_URL:http://localhost:8080/api}
+  minio:
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:zerocode}
+    secret-key: ${MINIO_SECRET_KEY:zerocode123}
+    bucket: ${MINIO_BUCKET:zerocode}

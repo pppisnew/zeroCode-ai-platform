@@ -1,0 +1,31 @@
+[project]
+name = "zerocode-ai-orchestrator"
+version = "0.1.0"
+description = "ZeroCode Python AI orchestration service"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.6",
+    "uvicorn[standard]>=0.34.0",
+    "pydantic>=2.10.4",
+    "langgraph>=0.2.60",
+    "pydantic-ai>=0.0.18",
+    "playwright>=1.49.1",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.3.0",
+    "pytest>=8.3.4",
+    "ruff>=0.8.4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

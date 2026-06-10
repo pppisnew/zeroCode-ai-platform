@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+dist/
+target/
+.idea/
+.vscode/
+.env
+.venv/
+__pycache__/
+!**/__init__.py
+.pytest_cache/
+.ruff_cache/
+*.log

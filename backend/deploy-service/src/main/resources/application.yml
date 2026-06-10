@@ -1,0 +1,17 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: deploy-service
+
+zerocode:
+  deploy:
+    store-path: ${DEPLOY_STORE_PATH:/tmp/zerocode-deployments.json}
+    executors:
+      docker:
+        enabled: ${DEPLOY_DOCKER_EXECUTOR_ENABLED:false}
+      github-actions:
+        enabled: ${DEPLOY_GITHUB_ACTIONS_EXECUTOR_ENABLED:false}
+      kubernetes:
+        enabled: ${DEPLOY_KUBERNETES_EXECUTOR_ENABLED:false}
