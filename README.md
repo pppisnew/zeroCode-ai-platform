@@ -12,6 +12,14 @@ infra/                       MySQL, Redis, RabbitMQ, MinIO
 doc/                         Product and architecture documents
 ```
 
+## Operations Documents
+
+- `doc/operations.md`: startup, configuration, verification, troubleshooting, and maintenance runbook.
+- `doc/deployment.md`: deployment package and deploy-service executor boundaries.
+- `doc/security-rules.md`: frontend/Python/Java security rule alignment.
+- `doc/task-current.md`: current task state and recovery context.
+- `doc/git.md`: Git remote, ignore rules, and commit workflow.
+
 ## Run Infrastructure
 
 ```bash

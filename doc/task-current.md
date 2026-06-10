@@ -548,6 +548,14 @@ Java 安全与限制：
   - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
   - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：42 tests passed。
   - deploy-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed。
+- 当前进入后期运维文档补齐：
+  - 目标是新增统一运维入口，覆盖启动顺序、端口、环境变量、测试命令、部署执行器、安全边界、日志/数据位置和常见故障排查。
+  - 计划新增 `doc/operations.md`，并在根 `README.md` 中加入运维文档索引。
+  - 本轮仅调整文档，不修改运行时代码。
+- 后期运维文档补齐已完成：
+  - 新增 `doc/operations.md`，覆盖服务拓扑、启动顺序、环境变量、验证命令、部署执行器安全边界、数据与备份、日志排障和变更流程。
+  - 根 `README.md` 已新增 Operations Documents 索引，指向运维、部署、安全、任务状态和 Git 文档。
+  - `doc/sql.md` 已同步 `infra/mysql/init.sql`，补齐字段约束、索引、`chat_message` 和 `ai_task` 表。
 
 ## 4. 核心设计决策
 
@@ -720,6 +728,7 @@ Java 安全与限制：
 - [x] Phase 3：实现 Docker executor 受控真实执行路径。
 - [x] 修正 `doc/deployment.md` 与 `doc/task-current.md` 中关于 deploy-service executor 状态的旧口径。
 - [x] 性能优化：评估 Monaco/GrapesJS 的进一步分包策略或 chunk warning 策略。
+- [x] 新增并维护后期运维文档，方便接手人员启动、验证、排障和恢复任务上下文。
 
 ## 6. 下一步行动
 
@@ -732,16 +741,16 @@ sed -n '1,260p' doc/task-current.md
 然后继续处理 TODO 中最高优先级事项：
 
 ```text
-检查 `git status --short` 与 `git diff --stat`；
-确认只有本轮文档、夹具、测试和 Vite 配置变更；
-然后提交并推送。
+检查 `doc/operations.md`、`README.md`、`doc/sql.md` 的运维信息是否与当前配置一致；
+执行文档级检查；
+然后提交并推送本轮文档变更。
 ```
 
 如果用户要求继续“下一步”，建议优先执行：
 
 ```text
-提交并推送本轮变更；
-提交信息建议：`test: add shared content security fixtures`。
+提交并推送本轮运维文档变更；
+提交信息建议：`docs: add operations runbook`。
 ```
 
 当前下一步建议为：
