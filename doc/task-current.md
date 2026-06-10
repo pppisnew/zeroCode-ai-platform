@@ -426,8 +426,7 @@ Java 安全与限制：
   - 新增 `doc/git.md`，记录初始化状态、忽略规则、首次提交建议和注意事项。
   - 修正根 `.gitignore`，显式放行 `!**/__init__.py`，避免用户级全局忽略规则 `__*` 误忽略 Python 包标记文件。
   - 已验证 `git status --ignored --short`：`__init__.py` 不再被忽略；当前仅忽略 `.DS_Store`、缓存、构建产物、本地虚拟环境、`node_modules` 等。
-  - 当前尚未执行 `git add` 或 `git commit`。
-- 当前正在执行 GitHub 关联与推送：
+- GitHub 关联与推送已完成：
   - 目标仓库：`https://github.com/pppisnew/zeroCode-ai-platform.git`
   - 目标分支：`main`
   - 已设置 `origin` remote。
@@ -435,6 +434,7 @@ Java 安全与限制：
   - 已检查暂存内容：`node_modules`、`dist`、`target`、`.venv` 未进入暂存区；Python `__init__.py` 已进入暂存区。
   - 已创建首次提交：`3fe98bb chore: initialize repository`。
   - 已执行 `git push -u origin main`，本地 `main` 已跟踪 `origin/main`。
+  - 已追加并推送文档状态提交：`5ff1986 docs: record git remote push`。
 
 ## 4. 核心设计决策
 
