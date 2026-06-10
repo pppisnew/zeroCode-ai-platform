@@ -11,6 +11,27 @@
 - 持续补齐自动测试，确保每一步改动可验证、可恢复、可继续。
 - 将三层安全规则持久化为可对照文档，避免后续实现漂移。
 
+## 1.1 最新本地联调状态
+
+时间：2026-06-11 Asia/Shanghai。
+
+本轮完成真实本地前后端联调：
+
+- `scripts/start-project.sh` 已能拉起 Docker infra、AI Orchestrator、deploy-service、platform-service 和 frontend。
+- 前端入口：`http://localhost:5173`。
+- `GET http://localhost:5173/api/health` 返回 `code=0`。
+- `GET http://localhost:5173/api/apps` 返回 `code=0`。
+- `POST http://localhost:5173/api/generations/html` 返回 `code=0`，并写入 `app` / `app_version`。
+- platform-service `mvn test`：42 tests passed，BUILD SUCCESS。
+
+本轮定位并修复的本地启动问题：
+
+- 宿主机已有 `mysqld` 监听 `127.0.0.1:3306`，platform 连接 `localhost:3306` 时命中宿主机 MySQL，而不是 Docker MySQL，导致生成接口返回 `Internal server error`。
+- 根目录 `.env` 的 `MYSQL_PORT` 已改为 `3307`。
+- `.env.example` 和 `doc/operations.md` 已同步默认 MySQL host port 为 `3307`。
+- `.gitignore` 已改为忽略 `.env`，避免再次误提交本地密钥配置。
+- `backend/platform-service/src/main/java/com/zerocode/platform/config/GlobalExceptionHandler.java` 已增加 500 异常日志，后续可直接在 `.runtime/logs/platform-service.log` 查看真实异常栈。
+
 ## 2. 当前进度
 
 ### 前端

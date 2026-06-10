@@ -20,7 +20,7 @@
 | AI Orchestrator | `ai-services/ai-orchestrator` | `8000` | FastAPI AI 生成、修复、sandbox |
 | Platform Service | `backend/platform-service` | `8080`，context path `/api` | 应用、版本、ZIP、部署入口 |
 | Deploy Service | `backend/deploy-service` | `8081` | 部署记录、executor routing、受控部署执行器 |
-| MySQL | `infra/docker-compose.yml` | `3306` | 平台业务数据 |
+| MySQL | `infra/docker-compose.yml` | `3307` | 平台业务数据 |
 | Redis | `infra/docker-compose.yml` | `6379` | 后续缓存/会话能力 |
 | RabbitMQ | `infra/docker-compose.yml` | `5672` / `15672` | 后续异步任务能力 |
 | MinIO | `infra/docker-compose.yml` | `9000` / `9001` | 后续对象存储能力 |
@@ -162,6 +162,42 @@ npm run dev
 http://localhost:5173
 ```
 
+### 3.6 本地前后端联调验证
+
+推荐通过前端端口验证真实路径，确保请求经过 Vite proxy，再进入 platform-service：
+
+```bash
+curl http://localhost:5173/api/health
+curl http://localhost:5173/api/apps
+```
+
+验证生成主链路：
+
+```bash
+curl -X POST http://localhost:5173/api/generations/html \
+  -H 'Content-Type: application/json' \
+  --data '{"prompt":"生成一个个人作品集首页，包含项目列表和联系按钮","projectType":"html"}'
+```
+
+预期：
+
+- `GET /api/health` 返回 `code=0`。
+- `GET /api/apps` 返回 `code=0`。
+- `POST /api/generations/html` 返回 `code=0`，并写入 `app` 和 `app_version`。
+
+如果只验证 platform-service，不经过前端代理：
+
+```bash
+curl http://localhost:8080/api/health
+curl http://localhost:8080/api/apps
+```
+
+如果只验证 AI Orchestrator：
+
+```bash
+curl http://localhost:8000/health
+```
+
 ## 4. 关键环境变量
 
 本地建议只维护根目录 `.env`：
@@ -170,6 +206,8 @@ http://localhost:5173
 cp .env.example .env
 ```
 
+`.env` 只用于本地，必须保持在 Git 忽略列表中。提交前执行 `git status --short`，不应看到 `.env`。
+
 `scripts/start-project.sh` 会自动加载根目录 `.env`，并把配置传给前端、Java 服务、Python 服务和 Docker Compose。手动启动基础设施时使用：
 
 ```bash
@@ -177,12 +215,28 @@ cd infra
 docker compose --env-file ../.env up -d
 ```
 
+修改 Docker Compose 相关端口后，需要重建容器映射：
+
+```bash
+scripts/stop-project.sh --infra
+scripts/start-project.sh
+```
+
+仅修改 `MYSQL_*` 密码、用户、数据库名时要注意：MySQL 官方镜像只在数据卷首次初始化时使用这些值。若已有旧数据卷且必须重置初始化参数，执行：
+
+```bash
+scripts/stop-project.sh --volumes
+scripts/start-project.sh
+```
+
+注意：`--volumes` 会删除本地数据库和基础设施数据。
+
 ### 4.1 Platform Service
 
 | 环境变量 | 默认值 | 说明 |
 | --- | --- | --- |
 | `MYSQL_HOST` | `localhost` | MySQL host |
-| `MYSQL_PORT` | `3306` | MySQL port |
+| `MYSQL_PORT` | `3307` | MySQL host port |
 | `MYSQL_ROOT_PASSWORD` | `root` | MySQL root 密码，仅 Docker Compose 初始化使用 |
 | `MYSQL_DATABASE` | `zerocode` | MySQL database |
 | `MYSQL_USERNAME` | `mysql` | MySQL 用户 |
@@ -304,6 +358,71 @@ Deploy service 默认不会执行真实生产命令。
 
 ## 8. 日志与排障
 
+### 前端显示 Request failed
+
+现象：
+
+- 前端页面请求失败。
+- 浏览器或前端状态栏显示 `Request failed`。
+
+检查：
+
+```bash
+lsof -nP -iTCP:5173 -iTCP:8080 -sTCP:LISTEN
+curl http://localhost:5173/api/health
+curl http://localhost:8080/api/health
+tail -120 .runtime/logs/frontend.log
+tail -120 .runtime/logs/platform-service.log
+```
+
+处理：
+
+- 如果 `5173` 未监听，检查 `frontend.log`，确认 Vite 没有因为端口占用退出。
+- 如果 `8080` 未监听，检查 `platform-service.log`。
+- 如果 `localhost:5173/api/health` 失败但 `localhost:8080/api/health` 成功，重点检查 `VITE_API_PROXY_TARGET`。
+- 启动脚本使用 `npm run dev -- --strictPort`，不会静默漂移到 `5174`。
+
+### 生成请求返回 Internal server error
+
+现象：
+
+- `GET /api/health` 正常。
+- `POST /api/generations/html` 返回：
+
+```json
+{"code":500,"data":null,"message":"Internal server error"}
+```
+
+检查：
+
+```bash
+tail -220 .runtime/logs/platform-service.log
+tail -120 .runtime/logs/ai-orchestrator.log
+curl http://localhost:8000/health
+curl http://localhost:5173/api/apps
+```
+
+判断：
+
+- AI 日志出现 `POST /generations/html 200 OK`，但 platform 返回 500，通常说明 AI 已生成成功，失败发生在 platform 后续处理或数据库写入。
+- `GET /api/apps` 也返回 500 时，优先排查数据库连接。
+- platform 日志若出现 `Failed to obtain JDBC Connection` 或 `Access denied for user`，检查 MySQL 端口、账号和 Docker volume 初始化状态。
+
+本地常见端口冲突：
+
+```bash
+lsof -nP -iTCP:3306 -iTCP:3307 -sTCP:LISTEN
+cd infra
+docker compose ps
+```
+
+如果看到宿主机已有 `mysqld` 监听 `127.0.0.1:3306`，而项目 MySQL 也映射到 `3306`，platform 可能连到宿主机 MySQL。处理方式：
+
+1. 将根目录 `.env` 中 `MYSQL_PORT` 设置为 `3307`。
+2. 执行 `scripts/stop-project.sh --infra`。
+3. 执行 `scripts/start-project.sh`。
+4. 再次验证 `curl http://localhost:5173/api/apps` 和生成接口。
+
 ### AI 服务不可用
 
 现象：
@@ -340,6 +459,7 @@ docker compose ps
 
 - 确认 MySQL 容器健康。
 - 确认 `MYSQL_HOST`、`MYSQL_PORT`、`MYSQL_DATABASE`、`MYSQL_USERNAME`、`MYSQL_PASSWORD`。
+- 确认宿主机端口没有被本机 MySQL 抢占；项目默认使用 `MYSQL_PORT=3307`。
 - 首次初始化 SQL 位于 `infra/mysql/init.sql`，对照文档见 `doc/sql.md`。
 
 ### 部署请求一直是 planned 或 skipped

@@ -11,4 +11,4 @@ __pycache__/
 .ruff_cache/
 *.log
 .runtime/
-!/.env
+.env

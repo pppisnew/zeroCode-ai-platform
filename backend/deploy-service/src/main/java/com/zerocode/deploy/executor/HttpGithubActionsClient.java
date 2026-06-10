@@ -9,6 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,6 +17,7 @@ public class HttpGithubActionsClient implements GithubActionsClient {
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
+    @Autowired
     public HttpGithubActionsClient(ObjectMapper objectMapper) {
         this(objectMapper, HttpClient.newHttpClient());
     }

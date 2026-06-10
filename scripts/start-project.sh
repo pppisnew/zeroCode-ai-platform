@@ -76,10 +76,23 @@ is_running() {
   [[ -f "$pid_file" ]] && kill -0 "$(cat "$pid_file")" >/dev/null 2>&1
 }
 
+is_port_in_use() {
+  local port="$1"
+  command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+}
+
+print_port_owner() {
+  local port="$1"
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -nP -iTCP:"$port" -sTCP:LISTEN >&2 || true
+  fi
+}
+
 start_service() {
   local name="$1"
   local workdir="$2"
-  shift 2
+  local port="$3"
+  shift 3
 
   local pid_file="$PID_DIR/$name.pid"
   local log_file="$LOG_DIR/$name.log"
@@ -89,12 +102,24 @@ start_service() {
     return
   fi
 
+  if [[ "$port" != "-" ]] && is_port_in_use "$port"; then
+    echo "$name cannot start because port $port is already in use." >&2
+    print_port_owner "$port"
+    exit 1
+  fi
+
   echo "Starting $name..."
   (
     cd "$workdir"
     nohup "$@" >"$log_file" 2>&1 &
     echo $! >"$pid_file"
   )
+  sleep 3
+  if ! is_running "$pid_file"; then
+    echo "$name failed to stay running; log: $log_file" >&2
+    tail -80 "$log_file" >&2 || true
+    exit 1
+  fi
   echo "$name started with PID $(cat "$pid_file"); log: $log_file"
 }
 
@@ -130,22 +155,26 @@ fi
 start_service \
   ai-orchestrator \
   "$ROOT_DIR/ai-services/ai-orchestrator" \
-  env UV_CACHE_DIR="${UV_CACHE_DIR:-/private/tmp/uv-cache}" uv run uvicorn app.main:app --reload --port 8000
+  8000 \
+  env UV_CACHE_DIR="${UV_CACHE_DIR:-/private/tmp/uv-cache}" uv run python -m uvicorn app.main:app --reload --port 8000
 
 start_service \
   deploy-service \
   "$ROOT_DIR/backend/deploy-service" \
+  8081 \
   mvn spring-boot:run
 
 start_service \
   platform-service \
   "$ROOT_DIR/backend/platform-service" \
+  8080 \
   mvn spring-boot:run
 
 start_service \
   frontend \
   "$ROOT_DIR/frontend" \
-  npm run dev
+  5173 \
+  npm run dev -- --strictPort
 
 cat <<EOF
 

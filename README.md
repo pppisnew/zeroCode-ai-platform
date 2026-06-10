@@ -30,6 +30,9 @@ cp .env.example .env
 scripts/start-project.sh
 ```
 
+The default local MySQL host port is `3307` to avoid conflicts with a MySQL
+server already running on `127.0.0.1:3306`.
+
 Stop application services:
 
 ```bash
@@ -48,6 +51,30 @@ Manual infrastructure startup:
 cd infra
 docker compose --env-file ../.env up -d
 ```
+
+## Local Integration Check
+
+After `scripts/start-project.sh` finishes, verify the real frontend-to-backend
+path through the Vite proxy:
+
+```bash
+curl http://localhost:5173/api/health
+curl http://localhost:5173/api/apps
+curl -X POST http://localhost:5173/api/generations/html \
+  -H 'Content-Type: application/json' \
+  --data '{"prompt":"生成一个个人作品集首页，包含项目列表和联系按钮","projectType":"html"}'
+```
+
+Expected result:
+
+- `/api/health` returns `code: 0`.
+- `/api/apps` returns `code: 0`.
+- `/api/generations/html` returns `code: 0` and creates one app version in MySQL.
+
+If the frontend shows `Request failed`, first check whether Vite and Platform
+Service are listening on `5173` and `8080`. If generation returns `Internal
+server error`, inspect `.runtime/logs/platform-service.log`; a common local
+cause is `MYSQL_PORT` pointing at a host MySQL instead of the Docker MySQL.
 
 ## Run Frontend
 
