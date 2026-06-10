@@ -274,6 +274,14 @@ Java 安全与限制：
   - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
   - Platform service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed，BUILD SUCCESS。
   - Deploy service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed，BUILD SUCCESS。
+- 最新全面测试时间：2026-06-10 15:53 Asia/Shanghai。
+- 最新全面测试结果：
+  - 前端 `npm run test`：2 test files / 12 tests passed。
+  - 前端 `npm run build`：通过；仍有 Monaco/GrapesJS 大 chunk warning。
+  - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest`：41 passed。
+  - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
+  - Platform service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed，BUILD SUCCESS。
+  - Deploy service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed，BUILD SUCCESS。
 
 已知 warning：
 
@@ -505,6 +513,14 @@ Java 安全与限制：
     - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest`：41 passed。
     - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
     - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed。
+- 最新全面测试已完成：
+  - 时间：2026-06-10 15:53 Asia/Shanghai。
+  - 前端 `npm run test`：2 test files / 12 tests passed。
+  - 前端 `npm run build`：通过；仍有 Monaco/GrapesJS 大 chunk warning。
+  - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest`：41 passed。
+  - Python `UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .`：All checks passed。
+  - platform-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：41 tests passed。
+  - deploy-service `mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test`：27 tests passed。
 
 ## 4. 核心设计决策
 
