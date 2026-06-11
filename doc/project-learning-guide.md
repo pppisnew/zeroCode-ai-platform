@@ -58,9 +58,10 @@ ZeroCode AI Platform 是一个“你用文字描述想要的网站，系统自�
 
 - 生成的是多文件项目，不是零散代码片段。
 - 项目可以保存、恢复、导出。
-- 有三层安全校验，避免危险代码进入系统。
-- 有部署服务，为后续自动发布打基础。
+- 有三层安全校验，避免危险代码进入系统（包括路径遍历防护、大小写不敏感文件类型检测等）。
+- 有部署服务，为后续自动发布打基础，配置化控制真实执行开关。
 - 有测试和文档，后续可以继续扩展。
+- 写操作有事务保护 (@Transactional)，版本号使用行锁防止并发冲突。
 
 # 3. 项目整体运行流程
 
@@ -109,10 +110,12 @@ frontend/src/hooks/useWorkspaceActions.ts
 handleGenerate()
 ```
 
-它会调用 API：
+它会调用 API（支持三种路由）：
 
 ```text
 POST /api/generations/html
+POST /api/generations/vue
+POST /api/generations/react
 ```
 
 ## 3.3 Java 平台服务接收请求
@@ -141,7 +144,7 @@ AiGenerationServiceImpl
 
 ## 3.4 Java 调用 Python AI 服务
 
-`AiGenerationServiceImpl` 通过 HTTP 调用 Python 服务：
+`AiGenerationServiceImpl` 通过 HTTP 调用 Python 服务（传入 projectType 区分 html/vue/react）：
 
 ```text
 POST http://localhost:8000/generations/html
@@ -953,12 +956,14 @@ Java ProjectFileValidator.java
 
 主要规则：
 
-- 禁止内联 script。
+- 禁止内联 script（但允许本地 `<script src="...">` 用于 Vue/React 入口）。
 - 禁止 onclick 等内联事件。
-- 禁止外部 URL。
-- 禁止 fetch/WebSocket。
-- 禁止 eval/new Function。
-- 禁止路径穿越 `../`。
+- 禁止外部 URL（包括 CSS 中 `url(http://...)` 和 `@import`）。
+- 禁止 fetch/XMLHttpRequest/WebSocket/EventSource。
+- 禁止 eval/new Function/字符串形式 setTimeout。
+- 路径校验：`\` 归一化为 `/`，防 `../` 穿越，防前导空格绕过，防绝对路径，防空路径段。
+- 文件扩展名大小写不敏感检测（`.Html` `.HTML` 都能识别）。
+- 单文件内容最大 200,000 字符，文件数量 1-100，路径最长 500。
 
 为什么三层都要做？
 
@@ -979,6 +984,7 @@ Java ProjectFileValidator.java
 - 把项目文件打包。
 - 附加部署文件。
 - 防止 zip-slip 路径攻击。
+- 再次校验文件内容大小（防止 DB 中历史数据超大）。
 
 核心文件：
 
@@ -1202,6 +1208,7 @@ planner -> ui -> code -> fix -> test
 DEPLOY_DOCKER_EXECUTOR_ENABLED
 DEPLOY_DOCKER_EXECUTION_MODE
 ZEROCODE_ENABLE_DOCKER_SANDBOX
+zerocode.default-user-id
 ```
 
 为什么？
@@ -1214,7 +1221,17 @@ ZEROCODE_ENABLE_DOCKER_SANDBOX
 - 需要时开启。
 - 不改代码切换行为。
 
-## 9.7 可扩展性
+## 9.7 事务与数据完整性
+
+项目中的写操作使用 `@Transactional` 保证事务原子性：
+
+- 创建版本时：先 `SELECT ... FOR UPDATE` 锁住版本号，再 INSERT，确保并发安全。
+- 删除应用时：先删除关联版本记录，再删除应用，防止孤儿数据。
+- 数据库层有 `UNIQUE(app_id, version_no)` 约束做最后防线。
+
+如果没有事务，部分操作失败会导致数据不一致（例如 app 删了但 version 还在）。
+
+## 9.8 可扩展性
 
 这个项目以后可以扩展：
 
@@ -1296,7 +1313,26 @@ fetch("https://evil.example")
 
 ### 为什么测试这么多
 
-企业开发不是“能跑就行”。要保证以后改代码不会悄悄弄坏旧功能。
+企业开发不是”能跑就行”。要保证以后改代码不会悄悄弄坏旧功能。
+
+### 为什么前端页面 502 / Request failed
+
+常见原因：
+
+- `.env` 中 `VITE_API_PROXY_TARGET` 端口写错了（比如写成 `8123` 而不是 `8080`）。Vite dev server 会把 `/api` 请求转发到这个地址，如果目标端口没服务，就返回 502。
+- platform-service 没启动或端口被占用。
+
+快速排查：
+
+```bash
+lsof -nP -iTCP:5173 -iTCP:8080 -sTCP:LISTEN
+curl http://localhost:5173/api/health
+curl http://localhost:8080/api/health
+```
+
+### 为什么 API 返回统一 envelope {code, data, message}
+
+因为统一格式让前端只需要一种解析逻辑。成功时 `code=0`，失败时 `code` 为非 0 且 `message` 是通用错误提示（不泄露内部实现细节）。
 
 # 11. 新手学习路线
 
