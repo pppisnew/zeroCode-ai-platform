@@ -18,8 +18,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<Void> handleIllegalArgument(IllegalArgumentException exception) {
-        return ApiResponse.fail(400, exception.getMessage());
+    public ApiResponse<Void> handleIllegalArgument() {
+        return ApiResponse.fail(400, "Invalid request");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

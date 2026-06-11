@@ -131,11 +131,17 @@ public class AppController {
         return ApiResponse.ok(true);
     }
 
+    private static final int MAX_ZIP_CONTENT_LENGTH = 200_000;
+
     private byte[] createZip(AppVersionVO version) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 ZipOutputStream zipStream = new ZipOutputStream(outputStream, StandardCharsets.UTF_8)) {
             ProjectFileValidator.validateProjectFiles(version.project().files());
             for (GeneratedFileVO file : version.project().files()) {
+                String content = file.content();
+                if (content != null && content.length() > MAX_ZIP_CONTENT_LENGTH) {
+                    throw new IllegalArgumentException("File content exceeds size limit");
+                }
                 writeZipEntry(zipStream, file);
             }
             for (GeneratedFileVO file : DeploymentPackageBuilder.buildDeploymentFiles(version.project())) {

@@ -30,6 +30,7 @@
 三层共同规则：
 
 - `\` 统一归一化为 `/`。
+- 路径归一化后执行 `.strip()` 去除首尾空白。
 - 禁止空路径。
 - 禁止绝对路径。
 - 禁止空路径段。
@@ -275,6 +276,6 @@ npm run build
 
 ```bash
 cd frontend && npm run test && npm run build
-cd ai-services/ai-orchestrator && UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest && UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .
+cd ai-services/ai-orchestrator && UV_CACHE_DIR=/private/tmp/uv-cache uv run python -m pytest && UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .
 cd backend/platform-service && mvn -Dmaven.repo.local=/private/tmp/zerocode-m2 test
 ```

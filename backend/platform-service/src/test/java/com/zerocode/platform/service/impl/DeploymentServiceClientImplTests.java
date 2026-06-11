@@ -41,7 +41,7 @@ class DeploymentServiceClientImplTests {
                         """))
                 .andRespond(withSuccess("""
                         {
-                          "code": 200,
+                          "code": 0,
                           "message": "ok",
                           "data": {
                             "id": "deploy-1",

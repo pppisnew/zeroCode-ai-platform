@@ -5,7 +5,7 @@ public record ApiResponse<T>(
         T data,
         String message) {
     public static <T> ApiResponse<T> ok(T data) {
-        return new ApiResponse<>(200, data, "ok");
+        return new ApiResponse<>(0, data, "ok");
     }
 
     public static <T> ApiResponse<T> error(int code, String message) {

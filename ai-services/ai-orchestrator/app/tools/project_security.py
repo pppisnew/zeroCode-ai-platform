@@ -32,8 +32,8 @@ def normalize_project_path(file_path: str) -> str:
 
 
 def is_safe_project_path(file_path: str) -> bool:
-    normalized = normalize_project_path(file_path)
-    if normalized.startswith("/") or not normalized.strip():
+    normalized = normalize_project_path(file_path).strip()
+    if normalized.startswith("/") or not normalized:
         return False
 
     for segment in normalized.split("/"):

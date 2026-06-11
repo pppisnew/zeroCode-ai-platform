@@ -46,7 +46,7 @@ class DeploymentControllerTests {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.message").value("ok"))
                 .andExpect(jsonPath("$.data.id").value("deploy-1"))
                 .andExpect(jsonPath("$.data.status").value("planned"))
@@ -99,7 +99,7 @@ class DeploymentControllerTests {
                         {
                           "code": 400,
                           "data": null,
-                          "message": "Deployment not found"
+                          "message": "Invalid request"
                         }
                         """));
     }

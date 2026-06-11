@@ -81,13 +81,13 @@ public final class ProjectFileValidator {
         if (filePath == null) {
             throw new IllegalArgumentException("Invalid file path");
         }
-        String normalized = filePath.replace('\\', '/');
+        String normalized = filePath.replace('\\', '/').strip();
         if (normalized.startsWith("/")
-                || normalized.isBlank()) {
+                || normalized.isEmpty()) {
             throw new IllegalArgumentException("Invalid file path");
         }
         for (String segment : normalized.split("/")) {
-            if (segment.equals(".") || segment.equals("..") || segment.isBlank()) {
+            if (segment.equals(".") || segment.equals("..") || segment.isEmpty()) {
                 throw new IllegalArgumentException("Invalid file path");
             }
         }
@@ -129,19 +129,20 @@ public final class ProjectFileValidator {
     }
 
     private static boolean isHtmlFile(String filePath, String fileType) {
-        return fileType.equals("html") || filePath.endsWith(".html");
+        return fileType.equals("html") || filePath.toLowerCase().endsWith(".html");
     }
 
     private static boolean isStyleFile(String filePath, String fileType) {
-        return fileType.equals("css") || filePath.endsWith(".css");
+        return fileType.equals("css") || filePath.toLowerCase().endsWith(".css");
     }
 
     private static boolean isScriptFile(String filePath, String fileType) {
+        String lowerPath = filePath.toLowerCase();
         return Set.of("js", "jsx", "ts", "tsx", "vue").contains(fileType)
-                || filePath.endsWith(".js")
-                || filePath.endsWith(".jsx")
-                || filePath.endsWith(".ts")
-                || filePath.endsWith(".tsx")
-                || filePath.endsWith(".vue");
+                || lowerPath.endsWith(".js")
+                || lowerPath.endsWith(".jsx")
+                || lowerPath.endsWith(".ts")
+                || lowerPath.endsWith(".tsx")
+                || lowerPath.endsWith(".vue");
     }
 }

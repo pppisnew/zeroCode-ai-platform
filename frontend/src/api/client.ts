@@ -4,7 +4,7 @@ export type ApiResponse<T> = {
   message: string
 }
 
-const API_BASE_URL = '/api'
+export const API_BASE_URL = '/api'
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -21,7 +21,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(response.ok ? 'Invalid API response' : 'Request failed')
   }
 
-  if (!response.ok || payload.code !== 0) {
+  if (!response.ok || (payload.code !== 0 && payload.code !== 200)) {
     throw new Error(payload.message || 'Request failed')
   }
 

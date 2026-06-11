@@ -1,42 +1,57 @@
 package com.zerocode.platform.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.zerocode.platform.dto.CreateAppRequest;
 import com.zerocode.platform.mapper.AppMapper;
+import com.zerocode.platform.mapper.AppVersionMapper;
 import com.zerocode.platform.model.AppEntity;
+import com.zerocode.platform.model.AppVersionEntity;
 import com.zerocode.platform.service.AppService;
 import com.zerocode.platform.vo.AppVO;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AppServiceImpl implements AppService {
 
-    private final AppMapper appMapper;
+    private static final int MAX_LIST_SIZE = 100;
 
-    public AppServiceImpl(AppMapper appMapper) {
+    private final AppMapper appMapper;
+    private final AppVersionMapper appVersionMapper;
+    private final long defaultUserId;
+
+    public AppServiceImpl(
+            AppMapper appMapper,
+            AppVersionMapper appVersionMapper,
+            @Value("${zerocode.default-user-id:1}") long defaultUserId) {
         this.appMapper = appMapper;
+        this.appVersionMapper = appVersionMapper;
+        this.defaultUserId = defaultUserId;
     }
 
     @Override
     public List<AppVO> listApps() {
         return appMapper.selectList(new LambdaQueryWrapper<AppEntity>()
-                        .orderByDesc(AppEntity::getCreateTime))
+                        .orderByDesc(AppEntity::getCreateTime)
+                        .last("LIMIT " + MAX_LIST_SIZE))
                 .stream()
                 .map(this::toVO)
                 .toList();
     }
 
     @Override
-    public AppVO createApp(CreateAppRequest request) {
+    @Transactional
+    public AppVO createApp(com.zerocode.platform.dto.CreateAppRequest request) {
         return createGeneratedApp(request.appName(), request.description(), request.type());
     }
 
     @Override
+    @Transactional
     public AppVO createGeneratedApp(String appName, String description, String type) {
         AppEntity app = new AppEntity();
-        app.setUserId(1L);
+        app.setUserId(defaultUserId);
         app.setAppName(appName);
         app.setDescription(description);
         app.setType(type);
@@ -57,7 +72,10 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
+    @Transactional
     public void deleteApp(Long id) {
+        appVersionMapper.delete(new LambdaQueryWrapper<AppVersionEntity>()
+                .eq(AppVersionEntity::getAppId, id));
         appMapper.deleteById(id);
     }
 

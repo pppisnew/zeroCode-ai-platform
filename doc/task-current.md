@@ -596,6 +596,34 @@ Java 安全与限制：
   - `README.md` 和 `doc/operations.md` 已补充脚本用法。
   - 已执行脚本静态验证：`bash -n scripts/start-project.sh`、`bash -n scripts/stop-project.sh` 均通过。
   - 已执行 help 输出验证：`scripts/start-project.sh --help`、`scripts/stop-project.sh --help` 均通过。
+- 系统测试与 Bug 修复：2026-06-11 Asia/Shanghai。
+  - 执行全量系统测试，发现并修复 17 个 bug。
+  - BUG-1：修复 `.env` 中 `VITE_API_PROXY_TARGET` 从错误的 `8123` 改为 `8080`。
+  - BUG-1：修复 `.env` 中 `PLATFORM_ARTIFACT_BASE_URL` 从错误的 `8123` 改为 `8080`。
+  - BUG-2：`AppVersionServiceImpl.createVersion()` 版本号查询增加 `FOR UPDATE` 行锁，配合已有 `UNIQUE(app_id, version_no)` 约束防止并发重复。
+  - BUG-3：`AppServiceImpl` 和 `AppVersionServiceImpl` 写方法增加 `@Transactional` 事务保护。
+  - BUG-4：`AppServiceImpl.deleteApp()` 删除 app 前先级联删除关联的 `app_version` 记录。
+  - BUG-5：`AppServiceImpl` 中 userId 从硬编码 `1L` 改为可配置属性 `zerocode.default-user-id`（默认 1）。
+  - BUG-6：文档 `operations.md`、`security-rules.md` 中 `uv run pytest` 命令改为 `uv run python -m pytest`。
+  - BUG-7：`listApps()` 和 `listVersions()` 增加 `LIMIT 100` 防止全量数据 OOM。
+  - BUG-8：`AppController.createZip()` 增加内容大小检查，拒绝超过 200,000 字符的文件。
+  - BUG-9：`deploy-service` 的 `ApiResponse.ok()` 成功码从 `200` 改为 `0`，与 platform-service 对齐。
+  - BUG-9：`DeploymentServiceClientImpl` 移除 `code != 200` 兼容判断。
+  - BUG-9：前端 `client.ts` 增加对 `code === 200` 的宽容处理（向后兼容）。
+  - BUG-10：`DockerDeploymentExecutor.downloadArtifact()` 增加 URL scheme 校验（仅允许 http/https）和 500MB 下载大小限制。
+  - BUG-11：Python `is_safe_project_path()` 和 Java `safeProjectPath()` 增加 `.strip()` 防止前导空格绕过路径安全检查。
+  - BUG-12：Java `ProjectFileValidator` 文件扩展名检测改为 `toLowerCase()` 大小写不敏感。
+  - BUG-13：`GlobalExceptionHandler` (platform-service 和 deploy-service) 的 `IllegalArgumentException` 处理改为返回通用 `Invalid request` 消息，不再泄露 `exception.getMessage()` 内部详情。
+  - BUG-14：前端 `downloadAppVersionZip()` 改为使用 `API_BASE_URL` 常量替代硬编码 `/api` 前缀。
+  - BUG-15/16：`GenerationController` 新增 `POST /generations/vue` 和 `POST /generations/react` 端点。
+  - BUG-17：同 BUG-1，`PLATFORM_ARTIFACT_BASE_URL` 已修正。
+- 修复后全量测试通过：2026-06-11 Asia/Shanghai。
+  - 前端 `npm run test`：2 test files / 13 tests passed。
+  - 前端 `npm run build`：通过。
+  - Python `uv run python -m pytest`：42 passed。
+  - Python `uv run ruff check .`：All checks passed。
+  - Platform service `mvn test`：42 tests passed，BUILD SUCCESS。
+  - Deploy service `mvn test`：27 tests passed，BUILD SUCCESS。
 
 ## 4. 核心设计决策
 

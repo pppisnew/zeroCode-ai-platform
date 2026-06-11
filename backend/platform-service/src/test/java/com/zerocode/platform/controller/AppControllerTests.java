@@ -197,7 +197,7 @@ class AppControllerTests {
                         {
                           "code": 400,
                           "data": null,
-                          "message": "Invalid file path"
+                          "message": "Invalid request"
                         }
                         """));
         verify(appVersionService, never()).createVersion(
@@ -236,7 +236,7 @@ class AppControllerTests {
                         {
                           "code": 400,
                           "data": null,
-                          "message": "Project file must not perform network requests"
+                          "message": "Invalid request"
                         }
                         """));
         verify(appVersionService, never()).createVersion(
@@ -323,7 +323,7 @@ class AppControllerTests {
                         {
                           "code": 400,
                           "data": null,
-                          "message": "Project file must not perform network requests"
+                          "message": "Invalid request"
                         }
                         """));
     }

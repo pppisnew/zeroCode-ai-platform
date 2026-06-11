@@ -1,4 +1,4 @@
-import { readErrorMessage, request } from './client'
+import { readErrorMessage, request, API_BASE_URL } from './client'
 import type {
   AppSummary,
   AppVersion,
@@ -33,7 +33,7 @@ export function listAppVersions(appId: string): Promise<AppVersion[]> {
 export async function downloadAppVersionZip(appId: string, versionNo: number): Promise<Blob> {
   assertPositiveVersionNo(versionNo)
   const response = await fetch(
-    `/api/apps/${encodePathSegment(appId)}/versions/${versionNo}/zip`,
+    `${API_BASE_URL}/apps/${encodePathSegment(appId)}/versions/${versionNo}/zip`,
   )
 
   if (!response.ok) {

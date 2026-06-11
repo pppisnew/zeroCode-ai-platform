@@ -5,6 +5,7 @@ import com.zerocode.deploy.model.DeploymentStatus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -146,10 +147,28 @@ public class DockerDeploymentExecutor extends TargetDeploymentExecutor {
         return result;
     }
 
+    private static final long MAX_ARTIFACT_DOWNLOAD_BYTES = 500 * 1024 * 1024;
+
     private void downloadArtifact(String artifactUrl, Path artifactZip) throws IOException {
         URI artifactUri = URI.create(artifactUrl);
-        try (InputStream inputStream = artifactUri.toURL().openStream()) {
-            Files.copy(inputStream, artifactZip, StandardCopyOption.REPLACE_EXISTING);
+        String scheme = artifactUri.getScheme();
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme) && !"file".equalsIgnoreCase(scheme)) {
+            throw new IllegalArgumentException("Artifact URL must use http, https or file scheme");
+        }
+        URL url = artifactUri.toURL();
+        try (InputStream inputStream = url.openStream()) {
+            byte[] buffer = new byte[8192];
+            long totalRead = 0;
+            int bytesRead;
+            try (java.io.OutputStream outputStream = Files.newOutputStream(artifactZip)) {
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    totalRead += bytesRead;
+                    if (totalRead > MAX_ARTIFACT_DOWNLOAD_BYTES) {
+                        throw new IllegalArgumentException("Artifact download exceeds size limit");
+                    }
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            }
         }
     }
 

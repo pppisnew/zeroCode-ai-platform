@@ -11,10 +11,14 @@ import com.zerocode.platform.vo.AppVersionVO;
 import com.zerocode.platform.vo.GeneratedProjectVO;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AppVersionServiceImpl implements AppVersionService {
+
+    private static final int MAX_LIST_SIZE = 100;
 
     private final AppVersionMapper appVersionMapper;
     private final ObjectMapper objectMapper;
@@ -25,12 +29,13 @@ public class AppVersionServiceImpl implements AppVersionService {
     }
 
     @Override
+    @Transactional
     public AppVersionVO createVersion(Long appId, String prompt, GeneratedProjectVO project) {
         ProjectFileValidator.validateProject(project);
         AppVersionEntity latest = appVersionMapper.selectOne(new LambdaQueryWrapper<AppVersionEntity>()
                 .eq(AppVersionEntity::getAppId, appId)
                 .orderByDesc(AppVersionEntity::getVersionNo)
-                .last("LIMIT 1"));
+                .last("LIMIT 1 FOR UPDATE"));
         int versionNo = latest == null ? 1 : latest.getVersionNo() + 1;
 
         AppVersionEntity version = new AppVersionEntity();
@@ -72,7 +77,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     public List<AppVersionVO> listVersions(Long appId) {
         return appVersionMapper.selectList(new LambdaQueryWrapper<AppVersionEntity>()
                         .eq(AppVersionEntity::getAppId, appId)
-                        .orderByAsc(AppVersionEntity::getVersionNo))
+                        .orderByAsc(AppVersionEntity::getVersionNo)
+                        .last("LIMIT " + MAX_LIST_SIZE))
                 .stream()
                 .map(this::toVO)
                 .toList();

@@ -36,7 +36,7 @@ public class DeploymentServiceClientImpl implements DeploymentServiceClient {
                 .body(Object.class);
 
         ApiResponse<DeploymentVO> apiResponse = objectMapper.convertValue(response, RESPONSE_TYPE);
-        if (apiResponse == null || (apiResponse.code() != 0 && apiResponse.code() != 200)) {
+        if (apiResponse == null || apiResponse.code() != 0) {
             String message = apiResponse == null ? "Deploy service unavailable" : apiResponse.message();
             throw new IllegalArgumentException(message);
         }

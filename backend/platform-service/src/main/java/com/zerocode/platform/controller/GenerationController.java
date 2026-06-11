@@ -24,4 +24,14 @@ public class GenerationController {
     public ApiResponse<GenerationResultVO> generateHtml(@Valid @RequestBody GenerateHtmlRequest request) {
         return ApiResponse.ok(aiGenerationService.generateHtml(request));
     }
+
+    @PostMapping("/vue")
+    public ApiResponse<GenerationResultVO> generateVue(@Valid @RequestBody GenerateHtmlRequest request) {
+        return ApiResponse.ok(aiGenerationService.generateHtml(request));
+    }
+
+    @PostMapping("/react")
+    public ApiResponse<GenerationResultVO> generateReact(@Valid @RequestBody GenerateHtmlRequest request) {
+        return ApiResponse.ok(aiGenerationService.generateHtml(request));
+    }
 }

@@ -304,7 +304,7 @@ npm run build
 
 ```bash
 cd ai-services/ai-orchestrator
-UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest
+UV_CACHE_DIR=/private/tmp/uv-cache uv run python -m pytest
 UV_CACHE_DIR=/private/tmp/uv-cache uv run ruff check .
 ```
 
@@ -440,7 +440,7 @@ curl http://localhost:8000/health
 
 - 确认 `AI_SERVICE_BASE_URL` 指向正确。
 - 确认 Python 服务已启动。
-- 执行 `UV_CACHE_DIR=/private/tmp/uv-cache uv run pytest` 排除本地依赖问题。
+- 执行 `UV_CACHE_DIR=/private/tmp/uv-cache uv run python -m pytest` 排除本地依赖问题。
 
 ### 数据库连接失败
 
