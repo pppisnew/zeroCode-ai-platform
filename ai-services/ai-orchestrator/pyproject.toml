@@ -10,6 +10,7 @@ dependencies = [
     "langgraph>=0.2.60",
     "pydantic-ai>=0.0.18",
     "playwright>=1.49.1",
+    "openai>=1.58.0",
 ]
 
 [dependency-groups]

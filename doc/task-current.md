@@ -624,6 +624,25 @@ Java 安全与限制：
   - Python `uv run ruff check .`：All checks passed。
   - Platform service `mvn test`：42 tests passed，BUILD SUCCESS。
   - Deploy service `mvn test`：27 tests passed，BUILD SUCCESS。
+- Phase 1 重构 — AI 真实生成：2026-06-12 Asia/Shanghai。
+  - 核心目标：将 AI 生成从硬编码模板替换为真实 LLM 调用。
+  - 1.1：`pyproject.toml` 添加 `openai>=1.58.0` 显式依赖。
+  - 1.2：新建 LLM Client 抽象层：
+    - `app/services/llm_config.py` — `LlmConfig` 从环境变量读取 LLM 配置。
+    - `app/services/llm_client.py` — `LlmClient` 抽象基类 + `OpenAiLlmClient`（使用 `response_format=json_schema` 做结构化输出）+ `NoOpLlmClient`（未配置 key 时抛出明确错误）。
+    - `app/services/dependencies.py` — `get_llm_client()` 单例工厂，无 API key 时自动返回 NoOpLlmClient。
+  - 1.3：重写 `html_generation_agents.py` 所有节点：
+    - `planner_node`：LLM 分析需求 + `PLANNER_SYSTEM_PROMPT`，输出项目规划。RuntimeError fallback 到原有模板。
+    - `ui_node`：LLM + `UI_SYSTEM_PROMPT`，输出 UI 结构描述。RuntimeError fallback。
+    - `code_node`：LLM + `CODE_SYSTEM_PROMPT`，使用 `chat_structured(GeneratedProject)` 做结构化输出，返回真正由 AI 生成的多文件项目。RuntimeError fallback 到 `_template_generate_files()`。
+    - `fix_node` / `test_node`：保持不变（模式匹配修复 + 安全沙箱）。
+    - `_llm_conversational_update()`：LLM 直接修改代码而非追加模板，传入完整项目 JSON 做 context。
+  - 1.4：`main.py` 增加 lifespan 启动日志，未配置 API key 时输出 warning。
+  - 1.5：`GeneratedProject` / `GeneratedFile` 模型增加 `ConfigDict(populate_by_name=True)`。
+  - 1.6：`.env.example` 新增 `LLM_PROVIDER`、`LLM_API_KEY`、`LLM_MODEL`、`LLM_BASE_URL`、`LLM_MAX_TOKENS`、`LLM_TEMPERATURE` 六个环境变量。
+  - 1.7：前端 `client.ts` 添加 timeout 支持，`generations.ts` 生成请求设置 60s 超时。
+  - 1.8：新增 `tests/test_llm_client.py`（5 tests），更新 `test_generation.py` 使模板 fallback 测试兼容新流程。
+  - 测试结果：Python 47 passed（新增 5），前端 13 passed + build 通过。
 
 ## 4. 核心设计决策
 

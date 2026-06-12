@@ -153,7 +153,7 @@ def test_html_generation_uses_workflow_steps(monkeypatch) -> None:
     assert result["issues"] == []
     assert result["test_report"] == [
         "File paths: safe",
-        "HTML elements: 6",
+        "HTML elements: 7",
         "CSS rules: present",
         "JavaScript: present",
         "Browser sandbox: skipped",

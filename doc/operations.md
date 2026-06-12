@@ -262,6 +262,12 @@ scripts/start-project.sh
 
 | 环境变量 | 默认值 | 说明 |
 | --- | --- | --- |
+| `LLM_PROVIDER` | `openai` | LLM 提供商（`openai` / `anthropic`） |
+| `LLM_API_KEY` | 空 | LLM API 密钥。未设置时使用模板 fallback 生成占位内容 |
+| `LLM_MODEL` | `gpt-4o-mini` | 使用的 LLM 模型 |
+| `LLM_BASE_URL` | 空 | LLM 代理地址（可选） |
+| `LLM_MAX_TOKENS` | `8192` | 单次生成最大 token 数 |
+| `LLM_TEMPERATURE` | `0.3` | 生成温度（0-1），越低越确定 |
 | `ZEROCODE_ENABLE_BROWSER_SANDBOX` | 未启用 | `true` 时启用 Playwright browser sandbox |
 | `ZEROCODE_ENABLE_DOCKER_SANDBOX` | 未启用 | `true` 时对 Vue/React 执行 Docker sandbox 构建检查 |
 | `ZEROCODE_DOCKER_SANDBOX_IMAGE` | `node:22-alpine` | Docker sandbox 镜像 |

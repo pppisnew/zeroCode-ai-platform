@@ -6,13 +6,20 @@ export type ApiResponse<T> = {
 
 export const API_BASE_URL = '/api'
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(
+  path: string,
+  init?: RequestInit & { timeout?: number },
+): Promise<T> {
+  const timeout = init?.timeout
+  const signal = timeout != null ? AbortSignal.timeout(timeout) : undefined
+  const { timeout: _, ...fetchInit } = init ?? {}
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
-      ...init?.headers,
+      ...fetchInit.headers,
     },
-    ...init,
+    ...fetchInit,
+    signal: signal ?? fetchInit.signal,
   })
 
   const payload = await parseOptionalApiResponse<T>(response)

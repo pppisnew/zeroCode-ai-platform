@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.project_limits import (
     MAX_FILE_CONTENT_LENGTH,
@@ -11,12 +11,16 @@ from app.models.project_type import ProjectType
 
 
 class GeneratedFile(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     file_path: str = Field(alias="filePath", min_length=1, max_length=MAX_FILE_PATH_LENGTH)
     file_type: str = Field(alias="fileType", min_length=1, max_length=MAX_FILE_TYPE_LENGTH)
     content: str = Field(max_length=MAX_FILE_CONTENT_LENGTH)
 
 
 class GeneratedProject(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     project_name: str = Field(alias="projectName", min_length=1, max_length=MAX_PROJECT_NAME_LENGTH)
     project_type: ProjectType = Field(default="html", alias="projectType")
     files: list[GeneratedFile] = Field(min_length=1, max_length=MAX_PROJECT_FILES)
