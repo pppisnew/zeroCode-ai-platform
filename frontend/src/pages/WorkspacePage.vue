@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import SplitterBar from '../components/SplitterBar.vue'
 import WorkspaceEditor from '../components/WorkspaceEditor.vue'
 import WorkspaceSidebar from '../components/WorkspaceSidebar.vue'
 import { useMonacoEditor } from '../hooks/useMonacoEditor'
@@ -20,12 +21,19 @@ const {
   selectedFilePath,
   files,
 } = storeToRefs(workspaceStore)
+
 const editorMode = ref<'code' | 'visual'>('code')
+const sidebarCollapsed = ref(false)
+const codeRatio = ref(0.56)
 const workspaceEditor = ref<InstanceType<typeof WorkspaceEditor>>()
+
 const editorContainer = computed(() => workspaceEditor.value?.editorContainer)
 const visualEditorContainer = computed(() => workspaceEditor.value?.visualEditorContainer)
-const selectedFile = computed(() => files.value.find((file) => file.filePath === selectedFilePath.value))
+const selectedFile = computed(() =>
+  files.value.find((file) => file.filePath === selectedFilePath.value),
+)
 const canUseVisualEditor = computed(() => projectType.value === 'html')
+
 const { createEditor, syncEditorValue, layoutEditor, disposeEditor } = useMonacoEditor(
   editorContainer,
   selectedFile,
@@ -64,7 +72,17 @@ const {
   restoreVersion,
 } = useWorkspaceActions(ensureCompatibleEditorMode)
 
-const previewDocument = computed(() => buildPreviewDocument(files.value, projectType.value))
+function onToggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+}
+
+function onCodeResize(ratio: number) {
+  codeRatio.value = ratio
+}
+
+const previewDocument = computed(() =>
+  buildPreviewDocument(files.value, projectType.value),
+)
 
 onMounted(() => {
   void refreshApps()
@@ -86,7 +104,6 @@ watch(editorMode, async (mode) => {
     layoutEditor()
     return
   }
-
   await createVisualEditor()
   syncVisualEditor()
 })
@@ -109,8 +126,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="workspace">
+  <main class="workspace" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
     <WorkspaceSidebar
+      v-if="!sidebarCollapsed"
       v-model:deployment-target="deploymentTarget"
       v-model:project-type="projectType"
       v-model:prompt="prompt"
@@ -138,16 +156,24 @@ onBeforeUnmount(() => {
       ref="workspaceEditor"
       v-model:editor-mode="editorMode"
       :can-use-visual-editor="canUseVisualEditor"
+      :code-ratio="codeRatio"
       :current-app-id="currentAppId"
       :current-version-no="currentVersionNo"
       :error-message="errorMessage"
+      :is-deploying="isDeploying"
       :is-exporting-zip="isExportingZip"
       :is-saving-version="isSavingVersion"
       :preview-document="previewDocument"
       :project-name="projectName"
       :selected-file="selectedFile"
+      @deploy="handleDeploy"
       @export-zip="handleExportZip"
       @save-version="handleSaveVersion"
-    />
+      @toggle-sidebar="onToggleSidebar"
+    >
+      <template #splitter>
+        <SplitterBar :current-ratio="codeRatio" @resize="onCodeResize" />
+      </template>
+    </WorkspaceEditor>
   </main>
 </template>
