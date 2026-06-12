@@ -148,8 +148,14 @@ def fix_node(state: HtmlGenerationState) -> HtmlGenerationState:
         required_paths = {"index.html", "style.css", "script.js"}
     actual_paths = {file.file_path for file in files}
     missing_paths = required_paths - actual_paths
-    if missing_paths:
-        issues.append(f"Missing files: {', '.join(sorted(missing_paths))}")
+    # Create missing required files with sensible defaults
+    for missing in sorted(missing_paths):
+        if missing == "style.css":
+            files.append(GeneratedFile(filePath="style.css", fileType="css", content="/* Generated styles */"))
+        elif missing == "script.js":
+            files.append(GeneratedFile(filePath="script.js", fileType="js", content="// Generated script"))
+        else:
+            issues.append(f"Missing file: {missing}")
 
     return {
         **state,
@@ -178,6 +184,8 @@ def test_node(state: HtmlGenerationState) -> HtmlGenerationState:
         )
     issues = [*existing_issues, *path_result.issues, *sandbox_result.issues]
     if issues:
+        import logging
+        logging.getLogger(__name__).error("Workflow checks failed: %s", issues)
         raise ValueError("Generated project failed workflow checks")
     return {
         **state,
@@ -358,7 +366,7 @@ def _build_vue_files(prompt: str) -> list[GeneratedFile]:
             fileType="json",
             content=(
                 '{"scripts":{"dev":"vite","build":"vite build"},'
-                '"dependencies":{"@vitejs/plugin-vue":"latest","vite":"latest","vue":"latest"},'
+                '"dependencies":{"@vitejs/plugin-vue":"^5.2.0","vite":"^6.0.0","vue":"^3.5.0"},'
                 '"devDependencies":{}}'
             ),
         ),
@@ -420,8 +428,8 @@ def _build_react_files(prompt: str) -> list[GeneratedFile]:
             fileType="json",
             content=(
                 '{"scripts":{"dev":"vite","build":"vite build"},'
-                '"dependencies":{"@vitejs/plugin-react":"latest","vite":"latest",'
-                '"react":"latest","react-dom":"latest"},'
+                '"dependencies":{"@vitejs/plugin-react":"^4.3.0","vite":"^6.0.0",'
+                '"react":"^18.3.0","react-dom":"^18.3.0"},'
                 '"devDependencies":{}}'
             ),
         ),

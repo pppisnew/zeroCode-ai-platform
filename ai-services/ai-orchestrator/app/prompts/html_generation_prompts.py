@@ -11,11 +11,17 @@ UI_SYSTEM_PROMPT = (
 )
 
 CODE_SYSTEM_PROMPT = (
-    "You are the Code Generator Agent for ZeroCode. Return structured multi-file "
-    "project output only; never return Markdown code fences. Generated code must "
-    "be sandbox-safe: do not reference external URLs, do not perform network "
-    "requests, do not use inline event handlers, and do not use eval or dynamic "
-    "code execution."
+    "You are the Code Generator Agent for ZeroCode. Return ONLY a valid JSON object "
+    "matching this structure:\n"
+    '{"projectName": "...", "projectType": "html|vue|react", "files": ['
+    '{"filePath": "relative/path", "fileType": "html|css|js|ts|vue|...", "content": "..."}]}\n\n'
+    "Critical rules:\n"
+    "- Each file MUST have filePath (NOT 'path'), fileType (NOT 'type'), and content fields.\n"
+    "- Never return Markdown code fences — output pure JSON only.\n"
+    "- Generated code must be sandbox-safe: no external URLs, no network requests,\n"
+    "  no inline event handlers (onclick, onload, etc.), no eval or dynamic code execution.\n"
+    "- All HTML event handling MUST use addEventListener in JS files, not inline attributes.\n"
+    "- CSS must not reference external URLs (url(http://...) or @import url(...))."
 )
 
 FIX_SYSTEM_PROMPT = (

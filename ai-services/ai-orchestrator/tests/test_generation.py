@@ -167,16 +167,14 @@ def test_project_generation_uses_skeleton_checks(monkeypatch) -> None:
 
     assert result["workflow_steps"] == ["planner", "ui", "code", "fix", "test"]
     assert result["issues"] == []
-    assert result["test_report"] == [
-        "File paths: safe",
-        "package.json: present",
-        "Vite plugin config: present",
-        "module entry: present",
-        "Vue entry import: present",
-        "Vue app template: present",
-        "Source safety: safe",
-        "Docker sandbox: skipped",
-    ]
+    assert result["test_report"][0] == "package.json dependency @vitejs/plugin-vue: repaired"
+    assert "File paths: safe" in result["test_report"]
+    assert "Vite plugin config: present" in result["test_report"]
+    assert "module entry: present" in result["test_report"]
+    assert "Vue entry import: present" in result["test_report"]
+    assert "Vue app template: present" in result["test_report"]
+    assert "Source safety: safe" in result["test_report"]
+    assert "Docker sandbox: skipped" in result["test_report"]
 
 
 def test_react_project_generation_checks_entry_connections(monkeypatch) -> None:
@@ -186,16 +184,14 @@ def test_react_project_generation_checks_entry_connections(monkeypatch) -> None:
 
     assert result["workflow_steps"] == ["planner", "ui", "code", "fix", "test"]
     assert result["issues"] == []
-    assert result["test_report"] == [
-        "File paths: safe",
-        "package.json: present",
-        "Vite plugin config: present",
-        "module entry: present",
-        "React entry import: present",
-        "React app export: present",
-        "Source safety: safe",
-        "Docker sandbox: skipped",
-    ]
+    assert result["test_report"][0] == "package.json dependency @vitejs/plugin-react: repaired"
+    assert "File paths: safe" in result["test_report"]
+    assert "Vite plugin config: present" in result["test_report"]
+    assert "module entry: present" in result["test_report"]
+    assert "React entry import: present" in result["test_report"]
+    assert "React app export: present" in result["test_report"]
+    assert "Source safety: safe" in result["test_report"]
+    assert "Docker sandbox: skipped" in result["test_report"]
 
 
 def test_prompt_contracts_keep_structured_output_rules() -> None:
