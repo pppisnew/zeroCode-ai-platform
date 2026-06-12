@@ -82,6 +82,87 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ── Arco form controls — Star Rail overrides ──────────── */
+
+/* Textarea & input: prevent jarring color changes on focus */
+.arco-textarea,
+.arco-textarea textarea,
+.arco-input,
+.arco-input input {
+  color: var(--text-warm) !important;
+  background: rgba(16, 20, 42, 0.6) !important;
+  border-color: var(--gold-mid) !important;
+  caret-color: var(--gold-400) !important;
+}
+
+.arco-textarea:hover,
+.arco-input:hover {
+  border-color: var(--gold-bright) !important;
+  background: rgba(16, 20, 42, 0.8) !important;
+}
+
+.arco-textarea:focus-within,
+.arco-textarea textarea:focus,
+.arco-input:focus-within,
+.arco-input input:focus {
+  color: var(--text-warm) !important;
+  background: rgba(20, 26, 48, 0.9) !important;
+  border-color: var(--gold-400) !important;
+  box-shadow: var(--glow-gold) !important;
+}
+
+/* Placeholder — keep muted but readable */
+.arco-textarea textarea::placeholder,
+.arco-input input::placeholder {
+  color: var(--text-dim) !important;
+  opacity: 0.7;
+}
+
+/* Select dropdown */
+.arco-select-view {
+  color: var(--text-warm) !important;
+  background: rgba(16, 20, 42, 0.6) !important;
+  border-color: var(--gold-mid) !important;
+}
+
+.arco-select-view:hover {
+  border-color: var(--gold-bright) !important;
+}
+
+.arco-select-popup {
+  background: var(--bg-starship) !important;
+  border: 1px solid var(--gold-mid) !important;
+}
+
+.arco-select-option {
+  color: var(--text-muted) !important;
+}
+
+.arco-select-option:hover,
+.arco-select-option.arco-select-option-active {
+  color: var(--gold-400) !important;
+  background: var(--gold-dim) !important;
+}
+
+/* Radio button group — already styled via CSS vars, fine-tune */
+.arco-radio-group-button .arco-radio-button {
+  color: var(--text-muted) !important;
+  background: rgba(16, 20, 42, 0.5) !important;
+  border-color: var(--gold-mid) !important;
+}
+
+.arco-radio-group-button .arco-radio-button:hover {
+  color: var(--text-warm) !important;
+  border-color: var(--gold-bright) !important;
+}
+
+.arco-radio-group-button .arco-radio-button.arco-radio-checked {
+  color: #0a0e1a !important;
+  background: var(--gold-400) !important;
+  border-color: var(--gold-400) !important;
+  font-weight: 700;
+}
+
 /* ── Reset ──────────────────────────────────────────────── */
 
 *,
