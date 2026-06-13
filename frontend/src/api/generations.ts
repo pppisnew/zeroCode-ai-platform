@@ -19,7 +19,7 @@ export function generateHtml(payload: GenerateHtmlPayload): Promise<GenerationRe
   return request<GenerationResult>('/generations/html', {
     method: 'POST',
     body: JSON.stringify(payload),
-    timeout: 60000,
+    timeout: 180000,
   })
 }
 
