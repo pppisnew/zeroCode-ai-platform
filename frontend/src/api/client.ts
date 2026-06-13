@@ -9,7 +9,7 @@ export const API_BASE_URL = '/api'
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('zerocode-token')
   if (!token) return {}
-  return { 'ZeroCode-Auth': token }
+  return { 'ZeroCode-Auth': token ?? '' }
 }
 
 export async function request<T>(

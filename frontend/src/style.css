@@ -49,118 +49,55 @@
 }
 
 /* ── Arco Design Dark-Theme Overrides ───────────────────── */
+/* Arco uses body[arco-theme='dark'] for its dark-mode variables.
+   We override those with Star Rail color palette.               */
 
-body {
+body[arco-theme='dark'] {
+  /* Primary palette → Gold */
   --color-primary-1: rgba(212, 168, 83, 0.1);
   --color-primary-2: rgba(212, 168, 83, 0.2);
   --color-primary-3: rgba(212, 168, 83, 0.3);
   --color-primary-4: rgba(212, 168, 83, 0.4);
   --color-primary-5: rgba(212, 168, 83, 0.55);
-  --color-primary-6: var(--gold-400);
-  --color-primary-7: var(--gold-500);
+  --color-primary-6: #d4a853;
+  --color-primary-7: #c9a03a;
   --color-primary-8: #b8922e;
 
-  --color-fill-1: var(--bg-starship);
+  /* Surfaces */
+  --color-bg-1: #10142a;
+  --color-bg-2: #161b38;
+  --color-bg-3: #1c2142;
+  --color-bg-4: #22284c;
+  --color-bg-5: #282e54;
+
+  --color-fill-1: #10142a;
   --color-fill-2: #181c36;
   --color-fill-3: #1e2240;
   --color-fill-4: rgba(255, 255, 255, 0.04);
 
-  --color-text-1: var(--text-warm);
-  --color-text-2: var(--text-muted);
-  --color-text-3: var(--text-dim);
+  /* Text */
+  --color-text-1: #e8e0d0;
+  --color-text-2: #9a9590;
+  --color-text-3: #5a5560;
+  --color-text-4: #3d3845;
 
+  /* Borders */
   --color-border-1: rgba(255, 255, 255, 0.08);
-  --color-border-2: var(--gold-mid);
+  --color-border-2: rgba(212, 168, 83, 0.2);
+  --color-border-3: rgba(255, 255, 255, 0.04);
+  --color-border-4: rgba(255, 255, 255, 0.02);
 
+  /* Border radius */
   --border-radius-small: 4px;
   --border-radius-medium: 6px;
   --border-radius-large: 8px;
+}
 
+body {
   margin: 0;
   background: var(--bg-deep-space);
   color: var(--text-warm);
   font-family: var(--font-sans);
-}
-
-/* ── Arco form controls — Star Rail overrides ──────────── */
-
-/* Textarea & input: prevent jarring color changes on focus */
-.arco-textarea,
-.arco-textarea textarea,
-.arco-input,
-.arco-input input {
-  color: var(--text-warm) !important;
-  background: rgba(16, 20, 42, 0.6) !important;
-  border-color: var(--gold-mid) !important;
-  caret-color: var(--gold-400) !important;
-}
-
-.arco-textarea:hover,
-.arco-input:hover {
-  border-color: var(--gold-bright) !important;
-  background: rgba(16, 20, 42, 0.8) !important;
-}
-
-.arco-textarea:focus-within,
-.arco-textarea textarea:focus,
-.arco-input:focus-within,
-.arco-input input:focus {
-  color: var(--text-warm) !important;
-  background: rgba(20, 26, 48, 0.9) !important;
-  border-color: var(--gold-400) !important;
-  box-shadow: var(--glow-gold) !important;
-}
-
-/* Placeholder — keep muted but readable */
-.arco-textarea textarea::placeholder,
-.arco-input input::placeholder {
-  color: var(--text-dim) !important;
-  opacity: 0.7;
-}
-
-/* Select dropdown */
-.arco-select-view {
-  color: var(--text-warm) !important;
-  background: rgba(16, 20, 42, 0.6) !important;
-  border-color: var(--gold-mid) !important;
-}
-
-.arco-select-view:hover {
-  border-color: var(--gold-bright) !important;
-}
-
-.arco-select-popup {
-  background: var(--bg-starship) !important;
-  border: 1px solid var(--gold-mid) !important;
-}
-
-.arco-select-option {
-  color: var(--text-muted) !important;
-}
-
-.arco-select-option:hover,
-.arco-select-option.arco-select-option-active {
-  color: var(--gold-400) !important;
-  background: var(--gold-dim) !important;
-}
-
-/* Radio button group — already styled via CSS vars, fine-tune */
-.arco-radio-group-button .arco-radio-button {
-  color: var(--text-muted) !important;
-  background: rgba(16, 20, 42, 0.5) !important;
-  border-color: var(--gold-mid) !important;
-}
-
-.arco-radio-group-button .arco-radio-button:hover {
-  color: var(--text-warm) !important;
-  border-color: var(--gold-bright) !important;
-}
-
-.arco-radio-group-button .arco-radio-button.arco-radio-checked {
-  color: #0a0e1a !important;
-  background: var(--gold-400) !important;
-  border-color: var(--gold-400) !important;
-  font-weight: 700;
 }
 
 /* ── Reset ──────────────────────────────────────────────── */

@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ZeroCode-Auth': token.value },
+        headers: { 'Content-Type': 'application/json', 'ZeroCode-Auth': token.value ?? '' },
       })
     } finally {
       clearAuth()
@@ -69,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!token.value) return false
     try {
       const response = await fetch('/api/auth/me', {
-        headers: { 'ZeroCode-Auth': token.value },
+        headers: { 'ZeroCode-Auth': token.value ?? '' },
       })
       const payload = await response.json()
       if (response.ok && payload.code === 0) {

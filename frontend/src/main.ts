@@ -7,6 +7,9 @@ import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 
+// Activate Arco Design dark theme for Star Rail overrides
+document.body.setAttribute('arco-theme', 'dark')
+
 const app = createApp(App)
 const pinia = createPinia()
 
