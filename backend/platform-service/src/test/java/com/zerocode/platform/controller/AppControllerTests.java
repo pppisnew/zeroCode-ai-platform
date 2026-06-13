@@ -298,7 +298,7 @@ class AppControllerTests {
                         {
                           "code": 400,
                           "data": null,
-                          "message": "Invalid request body"
+                          "message": "Invalid request"
                         }
                         """));
         verify(appVersionService, never()).createVersion(
