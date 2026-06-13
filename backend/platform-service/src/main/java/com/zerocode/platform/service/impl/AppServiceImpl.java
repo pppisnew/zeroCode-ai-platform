@@ -12,6 +12,7 @@ import com.zerocode.platform.vo.AppVO;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +68,7 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
+    @Cacheable(value = "apps", key = "#id")
     public AppVO getApp(Long id) {
         AppEntity app = appMapper.selectById(id);
         if (app == null) {
