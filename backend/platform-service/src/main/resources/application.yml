@@ -26,12 +26,13 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 
 sa-token:
-  token-name: Authorization
+  token-name: ZeroCode-Auth
   timeout: 2592000
   active-timeout: -1
   is-concurrent: true
   is-share: false
   token-style: uuid
+  is-read-cookie: false
 
 zerocode:
   ai-service:

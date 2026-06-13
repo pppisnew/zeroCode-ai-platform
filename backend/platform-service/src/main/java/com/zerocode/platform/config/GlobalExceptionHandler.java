@@ -1,5 +1,6 @@
 package com.zerocode.platform.config;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import com.zerocode.platform.vo.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,6 +16,12 @@ import org.springframework.web.client.RestClientException;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(NotLoginException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiResponse<Void> handleNotLogin() {
+        return ApiResponse.fail(401, "Not authenticated");
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

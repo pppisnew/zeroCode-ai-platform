@@ -6,6 +6,12 @@ export type ApiResponse<T> = {
 
 export const API_BASE_URL = '/api'
 
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem('zerocode-token')
+  if (!token) return {}
+  return { 'ZeroCode-Auth': token }
+}
+
 export async function request<T>(
   path: string,
   init?: RequestInit & { timeout?: number },
@@ -16,6 +22,7 @@ export async function request<T>(
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeaders(),
       ...fetchInit.headers,
     },
     ...fetchInit,

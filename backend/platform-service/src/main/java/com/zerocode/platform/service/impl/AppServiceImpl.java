@@ -1,5 +1,7 @@
 package com.zerocode.platform.service.impl;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zerocode.platform.mapper.AppMapper;
 import com.zerocode.platform.mapper.AppVersionMapper;
@@ -33,7 +35,9 @@ public class AppServiceImpl implements AppService {
 
     @Override
     public List<AppVO> listApps() {
+        long userId = resolveUserId();
         return appMapper.selectList(new LambdaQueryWrapper<AppEntity>()
+                        .eq(AppEntity::getUserId, userId)
                         .orderByDesc(AppEntity::getCreateTime)
                         .last("LIMIT " + MAX_LIST_SIZE))
                 .stream()
@@ -68,15 +72,35 @@ public class AppServiceImpl implements AppService {
         if (app == null) {
             throw new IllegalArgumentException("App not found");
         }
+        long userId = resolveUserId();
+        if (!app.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("App not found");
+        }
         return toVO(app);
     }
 
     @Override
     @Transactional
     public void deleteApp(Long id) {
+        AppEntity app = appMapper.selectById(id);
+        if (app == null) {
+            throw new IllegalArgumentException("App not found");
+        }
+        long userId = resolveUserId();
+        if (!app.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("App not found");
+        }
         appVersionMapper.delete(new LambdaQueryWrapper<AppVersionEntity>()
                 .eq(AppVersionEntity::getAppId, id));
         appMapper.deleteById(id);
+    }
+
+    private long resolveUserId() {
+        try {
+            return StpUtil.getLoginIdAsLong();
+        } catch (NotLoginException e) {
+            return defaultUserId;
+        }
     }
 
     private AppVO toVO(AppEntity app) {
